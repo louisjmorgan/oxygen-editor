@@ -26,7 +26,15 @@ const styles = {
   },
 };
 
-function Tools({ showTools, editName, copyNode, pasteNode, copyAddress, deleteSelf, displayInsert }) {
+function Tools({
+  showTools,
+  editName,
+  copyNode,
+  pasteNode,
+  copyAddress,
+  deleteSelf,
+  displayInsert,
+}) {
   return showTools
     ? e(
         "div",
@@ -62,24 +70,24 @@ function Tools({ showTools, editName, copyNode, pasteNode, copyAddress, deleteSe
           "📋"
         ),
         e(
-            "button",
-            {
-              onClick: copyAddress,
-              style: {
-                ...styles.toolButton,
-              },
+          "button",
+          {
+            onClick: copyAddress,
+            style: {
+              ...styles.toolButton,
             },
-            "@"
-          ),
+          },
+          "@"
+        ),
         e(
-        "button",
-        {
+          "button",
+          {
             onClick: deleteSelf,
             style: {
-            ...styles.toolButton,
+              ...styles.toolButton,
             },
-        },
-        "⌫"
+          },
+          "⌫"
         ),
         e(
           "button",

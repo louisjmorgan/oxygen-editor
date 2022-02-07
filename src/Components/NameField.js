@@ -33,8 +33,8 @@ const styles = {
 const NameField = ({
   node,
   address,
+  dispatch,
   showTools,
-  nodeToString,
   submitEdit,
   submitInsert,
   deleteSelf,
@@ -42,12 +42,6 @@ const NameField = ({
 }) => {
   const [edit, setEdit] = useState(false);
   const [input, setInput] = useState(node.name);
-  //   const [copySuccess, setCopySuccess] = useState(false);
-
-  function copyToClipboard(text) {
-    navigator.clipboard.writeText(text);
-    //   setCopySuccess(true);
-  }
 
   const handleInput = (e) => {
     setInput(e.target.value);
@@ -63,7 +57,10 @@ const NameField = ({
   };
 
   const copyNode = (e) => {
-    copyToClipboard(nodeToString(node));
+    dispatch({
+      type: "copy node",
+      node: node,
+    });
   };
 
   const pasteNode = (e) => {
@@ -71,8 +68,12 @@ const NameField = ({
   };
 
   const copyAddress = (e) => {
-    copyToClipboard(`${address}`);
+    dispatch({
+			type: "copy address",
+      address: address,
+    });
   };
+
   return e(
     "div",
     { style: styles.nameField },

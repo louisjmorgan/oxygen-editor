@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import NameField from "./NameField";
 import InsertNodeField from "./InsertNodeField";
-import createNode from "./createNode";
 
 const e = React.createElement;
 
@@ -38,43 +37,35 @@ const styles = {
 const Node = ({
   node,
   address,
-  active,
-  collapsed,
-  nodeToString,
-  updateNode,
-  insertNodeAsString,
-  deleteFromParent,
-  tabIndex,
+	dispatch,
+	deleteFromParent,
 }) => {
-  const [childActive, setChildActive] = useState(true);
   const [tools, setTools] = useState(false);
   const [insert, setInsert] = useState(false);
+	const [displayChildren, setDisplayChildren ] = useState(true);
+	
+	const toggleDisplayChildren = (e) => {
+		updateDisplayChildren(!displayChildren);
+		setDisplayChildren(!displayChildren);
+	}
 
-  useEffect(() => {
-    if (collapsed === true) setChildActive(false);
-    if (collapsed === false) setChildActive(true);
-  }, [collapsed]);
-
-  const toggleChildren = (e) => {
-    setChildActive((prev) => !prev);
-  };
-
-	const keyHandler = (e) => {
-		if ((e.key) === " ") {
-			e.preventDefault();
-			toggleChildren();
-			console.log('space')
-		}
+	const updateDisplayChildren = (visible) => {
+			dispatch({
+				type: "set children visible",
+				node: node,
+				address: address,
+				visible: visible,
+			})	
 	}
 
   const deleteChild = (child) => {
-    const newNode = createNode(node.name);
-    node.children.forEach((child) =>
-        newNode.children.set(child.name, child)
-        );
-    node.children.delete(child.name);
-    updateNode(node, address)
-    }
+    dispatch({
+			type: "delete child",
+			node: node,
+			address: address,
+			child: child,
+		})
+  };
 
   const displayTools = (e) => {
     setTools(true);
@@ -93,24 +84,29 @@ const Node = ({
   };
 
   const deleteSelf = (e) => {
-      deleteFromParent(node);
-  }
+    deleteFromParent(node);
+  };
 
   const updateNodeName = (input) => {
-    const newNode = createNode(input);
-    node.children.forEach((child) =>
-      newNode.children.set(child.name, child)
-    );
-    updateNode(newNode, address);
-  };
+    dispatch({
+			type: "update name",
+			node: node,
+			address: address,
+			newName: input,
+			})
+		};
 
   const submitInsert = (input) => {
     if (!input) {
       hideInsert();
       return;
     }
-    console.log(address)
-    insertNodeAsString(address, input);
+		console.log(input)
+		dispatch({
+			type: "paste node",
+			address: address,
+			nodeString: input,
+		})
     hideInsert();
   };
 
@@ -123,49 +119,44 @@ const Node = ({
           node: child,
           address: [...address, child.name],
           key: child.name,
-          active: childActive,
-          collapsed: collapsed,
-          nodeToString: nodeToString,
-          updateNode: updateNode,
+					dispatch: dispatch,
           deleteFromParent: deleteChild,
-          insertNodeAsString: insertNodeAsString,
-          tabIndex: tabIndex + 1,
         },
         null
       )
     );
   });
-  return active
+  return node.visible
     ? e(
         "div",
-        { style: styles.node, },
+        { style: styles.node },
         e(
           "div",
           {
             style: styles.flex,
             onMouseEnter: displayTools,
             onMouseLeave: hideTools,
-            tabIndex: tabIndex,
-						onKeyDown: (e) => keyHandler(e),
+            tabIndex: -1,	          
           },
           e(
             "button",
             {
-              onClick: toggleChildren,
+              onClick: toggleDisplayChildren,
               style: {
                 opacity: node.children.size > 0 ? 1 : 0,
                 ...styles.collapseChildren,
               },
+							tabIndex: -1,
             },
-            childActive ? "-" : "+"
+            node.visible ? "-" : "+"
           ),
           e(NameField, {
             node: node,
             address: address,
+						dispatch: dispatch,
             showTools: tools,
-            submitEdit: updateNodeName,
+						submitEdit: updateNodeName,
             submitInsert: submitInsert,
-            nodeToString: nodeToString,
             deleteSelf: deleteSelf,
             displayInsert: displayInsert,
           })
