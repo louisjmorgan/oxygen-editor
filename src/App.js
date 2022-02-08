@@ -4,7 +4,7 @@
 import "./App.css";
 import React, { useState, useReducer } from "react";
 import Node from "./Components/Node";
-import {treeReducer, parseNodes} from "./Utils/Tree"
+import { treeReducer, parseNodes } from "./Utils/Tree";
 const e = React.createElement;
 
 const code =
@@ -61,32 +61,25 @@ const styles = {
   },
 };
 
-
-
 function App() {
+  const [tree, dispatch] = useReducer(treeReducer, parseNodes(code));
 
-  
-	const [currentFocus, setCurrentFocus] = useState(["root"]);
-
-	function focusNode(address) {
-		setCurrentFocus(address);
-	};
-
-	
-
-	const [tree, dispatch] = useReducer(treeReducer, parseNodes(code))
-
-	// ui handlers
-  const [collapsed, setCollapse] = useState(false);
+  // ui handlers
+  const [collapsed, setCollapse] = useState(true);
 
   function collapseAll() {
-		dispatch({
-			type: "set collapse all",
-			visible: collapsed,
-		})
-    setCollapse((prev) => !prev);
+    dispatch({
+      type: "set collapse all",
+      displayChildren: !collapsed,
+    });
+    setCollapse(!collapsed);
   }
 
+  const [currentFocus, setCurrentFocus] = useState(["root"]);
+
+  function focusNode(address) {
+    setCurrentFocus(address);
+  }
 
   return (
     <div className="App">
@@ -96,16 +89,13 @@ function App() {
           { onClick: collapseAll, style: styles.collapseAll },
           "collapse all"
         )}
-        {
-				e(Node, {
-              node: tree,
-              address: ["root"],
-							key: 'root',
-              active: true,
-              collapsed: collapsed,
-              dispatch: dispatch,
-            })
-        }
+        {e(Node, {
+          node: tree,
+          address: ["root"],
+          key: "root",
+          visible: true,
+          dispatch: dispatch,
+        })}
       </main>
     </div>
   );

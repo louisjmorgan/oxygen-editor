@@ -38,24 +38,23 @@ const Node = ({
   node,
   address,
 	dispatch,
+	visible,
 	deleteFromParent,
 }) => {
   const [tools, setTools] = useState(false);
   const [insert, setInsert] = useState(false);
-	const [displayChildren, setDisplayChildren ] = useState(true);
-	
+
 	const toggleDisplayChildren = (e) => {
-		updateDisplayChildren(!displayChildren);
-		setDisplayChildren(!displayChildren);
+		setDisplayChildren(!node.displayChildren);
 	}
 
-	const updateDisplayChildren = (visible) => {
-			dispatch({
-				type: "set children visible",
-				node: node,
-				address: address,
-				visible: visible,
-			})	
+	const setDisplayChildren = (displayChildren) => {
+		dispatch({
+			type: "set children visible",
+			node: node,
+			address: address,
+			displayChildren: displayChildren,
+		})	
 	}
 
   const deleteChild = (child) => {
@@ -119,6 +118,7 @@ const Node = ({
           node: child,
           address: [...address, child.name],
           key: child.name,
+					visible: node.displayChildren,
 					dispatch: dispatch,
           deleteFromParent: deleteChild,
         },
@@ -126,7 +126,7 @@ const Node = ({
       )
     );
   });
-  return node.visible
+  return visible
     ? e(
         "div",
         { style: styles.node },
@@ -141,14 +141,14 @@ const Node = ({
           e(
             "button",
             {
-              onClick: toggleDisplayChildren,
+              onClick: (e) => toggleDisplayChildren(),
               style: {
                 opacity: node.children.size > 0 ? 1 : 0,
                 ...styles.collapseChildren,
               },
 							tabIndex: -1,
             },
-            node.visible ? "-" : "+"
+            node.displayChildren ? "-" : "+"
           ),
           e(NameField, {
             node: node,
