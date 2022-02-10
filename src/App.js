@@ -2,9 +2,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 import "./App.css";
-import React, { useState, useReducer } from "react";
+import React, { useState, useEffect, useRef, useReducer } from "react";
 import Node from "./Components/Node";
-import { treeReducer, parseNodes } from "./Utils/Tree";
+import { treeReducer, getNodeFromTree, initializeState } from "./Utils/Tree";
 const e = React.createElement;
 
 const code =
@@ -61,10 +61,233 @@ const styles = {
   },
 };
 
+const ALLOWED_KEYS = [
+  "ArrowUp",
+  "ArrowDown",
+  "ArrowLeft",
+  "ArrowRight",
+  "Backspace",
+  "Enter",
+  "Escape",
+  " ",
+  "c",
+  "C",
+  "v",
+  "V",
+  "a",
+  "A",
+  "e",
+  "E",
+  "Shift",
+  "Control",
+  "Alt",
+];
+
 function App() {
-  const [tree, dispatch] = useReducer(treeReducer, parseNodes(code));
+  const [state, dispatch] = useReducer(treeReducer, {
+    tree: null,
+    addressMap: null,
+    focus: null,
+  });
+
+  const [isLoaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    dispatch({
+      type: "initialize",
+      code: code,
+    });
+    setLoaded(() => true);
+  }, []);
+
+  const [pressedKeys, setPressedKeys] = useState([]);
+
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      const key = e.key;
+
+      if (key === " " || key === "ArrowUp" || key === "ArrowDown") e.preventDefault();
+
+      if (ALLOWED_KEYS.includes(key) && !pressedKeys.includes(key)) {
+        setPressedKeys((previousPressedKeys) => [...previousPressedKeys, key]);
+      }
+    };
+
+    const onKeyUp = (e) => {
+      const key = e.key;
+      if (ALLOWED_KEYS.includes(key)) {
+        setPressedKeys((previousPressedKeys) =>
+          previousPressedKeys.filter((k) => k !== key)
+        );
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("keyup", onKeyUp);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("keyup", onKeyUp);
+    };
+  }, [pressedKeys]);
+
+  function getParentAddress(address) {
+    const length = address.length;
+    if (length > 1) {
+      const newAddress = address.filter((elem, i) => i !== length - 1);
+      return newAddress;
+    } else {
+      return null;
+    }
+  }
+
+  function findFocusIndex(address) {
+    let index = -1;
+    state.focus.forEach((item, i) => {
+      if (item.toString() === address.toString()) index = i;
+    });
+    return index;
+  }
+
+  useEffect(() => {
+    console.log(pressedKeys);
+
+
+    if (state.editing) {
+      switch(pressedKeys.toString()) {
+        case "Enter": {
+          const node = getNodeFromTree(state.focus[0], state.tree)
+          const parent = getNodeFromTree(getParentAddress(state.focus[0]), state.tree)
+          dispatch({
+            type: "submit name",
+            node: node,
+            parent: parent,
+          })
+          return;
+        }
+
+        case "Escape": {
+          dispatch({
+            type: "edit name",
+            address: state.focus[0],
+            edit: false,
+          })
+          return;
+        }
+      }
+    } else {
+      switch (pressedKeys.toString()) {
+        case "ArrowRight": {
+          const node = getNodeFromTree(state.focus[0], state.tree);
+          
+          if (node.children.size !== 0 ) {
+            const displayChildren = state.addressMap.get(node.address.toString()).display;
+            if (displayChildren === false) {
+              dispatch({
+                type: "set display children",
+                address: node.address,
+                display: true,
+              })
+            }
+            dispatch({
+              type: "unfocus node",
+              address: state.focus[0],
+            });
+            dispatch({
+              type: "focus node",
+              address: node.children.values().next().value.address,
+            });
+          }
+          return;
+        }
+
+        case "ArrowLeft": {
+          const parentAddress = getParentAddress(state.focus[0]);
+          if (parentAddress) {
+            dispatch({
+              type: "unfocus node",
+              address: state.focus[0],
+            });
+            dispatch({
+              type: "focus node",
+              address: parentAddress,
+            });
+          }
+          return;
+        }
+
+        case "Backspace": {
+          state.focus.forEach((address) => {
+            const node = getNodeFromTree(address, state.tree);
+            const parentAddress = getParentAddress(address);
+            dispatch({
+              type: "delete child",
+              child: node,
+              node: getNodeFromTree(parentAddress, state.tree),
+            });
+          });
+          return;
+        }
+
+        case " ": {
+          state.focus.forEach((address) => {
+            const prev = state.addressMap.get(address.toString()).display
+            dispatch({
+              type: "set display children",
+              address: address,
+              display: !prev,
+            })
+          })
+          return;
+        }
+
+        case "c": {
+          state.focus.forEach((address) => {
+            const node = getNodeFromTree(address, state.tree);
+            dispatch({
+              type: "copy node",
+              node: node,
+            });
+          });
+          return;
+        }
+
+        case "v": {
+          state.focus.forEach((address) => {
+            const node = getNodeFromTree(address, state.tree);
+            navigator.clipboard.readText().then((text) =>
+              dispatch({
+                type: "paste node",
+                address: address,
+                nodeString: text,
+              })
+            );
+          })
+          return;
+        }
+
+        case "a": {
+          state.focus.forEach((address) => {
+            dispatch({
+              type: "copy address",
+              address: address,
+            })
+          })
+          return;
+        }
+
+        case "e": {
+          dispatch({
+            type: "edit name",
+            address: state.focus[0],
+            edit: true,
+          })
+        }
+      }
+    }
+  }, [pressedKeys]);
 
   // ui handlers
+
   const [collapsed, setCollapse] = useState(true);
 
   function collapseAll() {
@@ -75,28 +298,35 @@ function App() {
     setCollapse(!collapsed);
   }
 
-  const [currentFocus, setCurrentFocus] = useState(["root"]);
+  // function updateDisplay(address, display) {
+  //   console.log(display)
 
-  function focusNode(address) {
-    setCurrentFocus(address);
-  }
+  //   return;
+  // }
 
   return (
     <div className="App">
-      <main className="App-main">
-        {e(
-          "button",
-          { onClick: collapseAll, style: styles.collapseAll },
-          "collapse all"
-        )}
-        {e(Node, {
-          node: tree,
-          address: ["root"],
-          key: "root",
-          visible: true,
-          dispatch: dispatch,
-        })}
-      </main>
+      {isLoaded ? (
+        <main className="App-main">
+          {e(
+            "button",
+            { onClick: collapseAll, style: styles.collapseAll },
+            "collapse all"
+          )}
+          {e(Node, {
+            node: state.tree,
+            key: "root",
+            focussed: findFocusIndex(state.tree.address),
+            findFocusIndex: findFocusIndex,
+            addressMap: state.addressMap,
+            displayChildren: state.addressMap.get(state.tree.address.toString()).display,
+            visible: true,
+            dispatch: dispatch,
+          })}
+        </main>
+      ) : (
+        ""
+      )}
     </div>
   );
 }

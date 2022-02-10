@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Tools from "./Tools";
 
 const e = React.createElement;
@@ -32,28 +32,33 @@ const styles = {
 
 const NameField = ({
   node,
-  address,
   dispatch,
   showTools,
+  edit,
   submitEdit,
   submitInsert,
   deleteSelf,
   displayInsert,
 }) => {
-  const [edit, setEdit] = useState(false);
   const [input, setInput] = useState(node.name);
 
+  useEffect(() => {
+    setInput(() => node.name)
+  }, [edit, node.name]);
+  
+
   const handleInput = (e) => {
-    setInput(e.target.value);
+    setInput(() => e.target.value);
+    dispatch({
+      type: "input name",
+      address: node.address,
+      input: e.target.value,
+    })
   };
 
-  const editName = (e) => {
-    setEdit(true);
-  };
 
   const submit = (e) => {
     submitEdit(input);
-    setEdit(false);
   };
 
   const copyNode = (e) => {
@@ -70,9 +75,17 @@ const NameField = ({
   const copyAddress = (e) => {
     dispatch({
 			type: "copy address",
-      address: address,
+      address: node.address,
     });
   };
+
+  function editName() {
+    dispatch({
+      type: "edit name",
+      address: node.address,
+      edit: true,
+    })
+  }
 
   return e(
     "div",
@@ -82,6 +95,7 @@ const NameField = ({
           "div",
           null,
           e("input", {
+            autoFocus: true,
             style: styles.input,
             value: input,
             onChange: handleInput,
@@ -105,6 +119,7 @@ const NameField = ({
           Tools,
           {
             showTools: showTools,
+            dispatch: dispatch,
             editName: editName,
             copyNode: copyNode,
             pasteNode: pasteNode,

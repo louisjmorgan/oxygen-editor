@@ -36,32 +36,32 @@ const styles = {
 
 const Node = ({
   node,
-  address,
 	dispatch,
+  addressMap,
+  findFocusIndex,
+  focussed,
 	visible,
+  displayChildren,
 	deleteFromParent,
 }) => {
   const [tools, setTools] = useState(false);
   const [insert, setInsert] = useState(false);
 
-	const toggleDisplayChildren = (e) => {
-		setDisplayChildren(!node.displayChildren);
-	}
-
-	const setDisplayChildren = (displayChildren) => {
+	
+  const toggleDisplayChildren = (e) => {
+    console.log(node.address)
 		dispatch({
-			type: "set children visible",
-			node: node,
-			address: address,
-			displayChildren: displayChildren,
-		})	
+      type: "set display children",
+      address: node.address,
+      display: !displayChildren,
+    })
 	}
+  
 
   const deleteChild = (child) => {
     dispatch({
 			type: "delete child",
 			node: node,
-			address: address,
 			child: child,
 		})
   };
@@ -87,11 +87,10 @@ const Node = ({
   };
 
   const updateNodeName = (input) => {
+    console.log(input)
     dispatch({
-			type: "update name",
-			node: node,
-			address: address,
-			newName: input,
+			type: "submit name",
+		  node: node,
 			})
 		};
 
@@ -100,15 +99,15 @@ const Node = ({
       hideInsert();
       return;
     }
-		console.log(input)
 		dispatch({
 			type: "paste node",
-			address: address,
 			nodeString: input,
+      address: node.address,
 		})
     hideInsert();
   };
 
+ 
   const childNodes = [];
   node.children.forEach((child) => {
     childNodes.push(
@@ -116,16 +115,21 @@ const Node = ({
         Node,
         {
           node: child,
-          address: [...address, child.name],
+          dispatch: dispatch,
+          addressMap: addressMap,
+          visible: displayChildren,
+          displayChildren: addressMap.get(child.address.toString()).display,
           key: child.name,
-					visible: node.displayChildren,
-					dispatch: dispatch,
+          focussed: findFocusIndex(child.address),
+          findFocusIndex: findFocusIndex,
           deleteFromParent: deleteChild,
         },
         null
       )
     );
   });
+
+
   return visible
     ? e(
         "div",
@@ -133,10 +137,10 @@ const Node = ({
         e(
           "div",
           {
-            style: styles.flex,
+            style: {...styles.flex, outline: focussed > -1 ? "solid white 1px" : "none",},
             onMouseEnter: displayTools,
             onMouseLeave: hideTools,
-            tabIndex: -1,	          
+           
           },
           e(
             "button",
@@ -148,13 +152,13 @@ const Node = ({
               },
 							tabIndex: -1,
             },
-            node.displayChildren ? "-" : "+"
+            displayChildren ? "-" : "+"
           ),
           e(NameField, {
             node: node,
-            address: address,
 						dispatch: dispatch,
             showTools: tools,
+            edit: addressMap.get(node.address.toString()).editName,
 						submitEdit: updateNodeName,
             submitInsert: submitInsert,
             deleteSelf: deleteSelf,

@@ -35,6 +35,7 @@ function Tools({
   deleteSelf,
   displayInsert,
 }) {
+
   return showTools
     ? e(
         "div",
