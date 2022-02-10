@@ -160,7 +160,6 @@ function App() {
           dispatch({
             type: "submit name",
             node: node,
-            parent: parent,
           })
           return;
         }
@@ -179,7 +178,7 @@ function App() {
         case "ArrowRight": {
           const node = getNodeFromTree(state.focus[0], state.tree);
           
-          if (node.children.size !== 0 ) {
+          if (node.children.size > 0 ) {
             const displayChildren = state.addressMap.get(node.address.toString()).display;
             if (displayChildren === false) {
               dispatch({
@@ -210,6 +209,38 @@ function App() {
             dispatch({
               type: "focus node",
               address: parentAddress,
+            });
+          }
+          return;
+        }
+
+        case "ArrowDown": {
+          const node = getNodeFromTree(state.focus[0], state.tree);
+          const parent = getNodeFromTree(getParentAddress(state.focus[0]), state.tree);
+          if (node.index < parent.children.size - 1) {
+            dispatch({
+              type: "unfocus node",
+              address: state.focus[0],
+            });
+            dispatch({
+              type: "focus node",
+              address: [...parent.children][node.index + 1][1].address,
+            });
+          }
+          return;
+        }
+
+        case "ArrowUp": {
+          const node = getNodeFromTree(state.focus[0], state.tree);
+          const parent = getNodeFromTree(getParentAddress(state.focus[0]), state.tree);
+          if (node.index > 0) {
+            dispatch({
+              type: "unfocus node",
+              address: state.focus[0],
+            });
+            dispatch({
+              type: "focus node",
+              address: [...parent.children][node.index - 1][1].address,
             });
           }
           return;

@@ -43,7 +43,7 @@ function Tools({
         e(
           "button",
           {
-            onClick: editName,
+            onClick: e => editName(),
             style: {
               ...styles.toolButton,
             },

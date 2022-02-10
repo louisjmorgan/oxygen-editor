@@ -1,9 +1,9 @@
 /* eslint-disable default-case */
 // functions to parse nodes to/from strings
 
-function createNode(name, address = []) {
+function createNode(name, address = [], index = 0) {
   const children = new Map();
-  return { name, children, address };
+  return { name, children, index, address };
 }
 
 function parseNodes(code, rootName = "root") {
@@ -14,6 +14,7 @@ function parseNodes(code, rootName = "root") {
     if (token.x === 0) {
       const node = parseRecursive(token, tokens, nodes.address, index + 1);
       node.address = [...nodes.address, token.value];
+
       nodes.children.set(token.value, node);
     }
   });
@@ -23,12 +24,15 @@ function parseNodes(code, rootName = "root") {
 function parseRecursive(superToken, tokens, address, index) {
   const node = createNode(superToken.value);
   node.address = [...address, superToken.value];
+  let orderIndex = 0;
   for (let i = index; i < tokens.length; i++) {
     const token = tokens[i];
     if (token.x <= superToken.x) break;
     if (token.x === superToken.x + 1) {
       const sub = parseRecursive(token, tokens, node.address, i + 1);
       sub.address = [...node.address, token.value];
+      sub.index = orderIndex;
+      orderIndex++;
       node.children.set(token.value, sub);
     }
   }
@@ -83,7 +87,7 @@ function getNodeFromTree(address, node) {
 }
 
 function updateAddresses(node, address) {
-  const newNode = createNode(node.name, address);
+  const newNode = createNode(node.name, address, node.index);
   node.children.forEach((child) => {
     newNode.children.set(
       child.name,
@@ -98,31 +102,53 @@ function updateNodeInTree(node, newNode, address) {
   if (search.length === 1) return newNode;
 
   // create empty node to populate from old version
-  const newTree = createNode(address[0], node.address);
+  const newTree = createNode(address[0], [...node.address], node.index);
 
-  // copy old tree structure, performing recursive deep copy only when address matches update
-  if (search.length > 1) {
-    let shouldUpdate = false;
-
-    node.children.forEach((child, index) => {
-      if (child.name === search[1] && child.name !== search[0]) {
-        shouldUpdate = true;
-        search.shift();
-        newTree.children.set(
-          child.name,
-          updateNodeInTree(child, newNode, search)
-        );
-      } else {
-        newTree.children.set(child.name, child);
-      }
-    });
-
+  if (search.length === 2) {
+    let shouldUpdate = [...node.children].reduce((prev, child) => {
+      return (child[0] === search[1] && child[0] !== search[0]) || prev;
+    }, false);
+    console.log(shouldUpdate)
+    
     if (!shouldUpdate) {
-      search.shift();
+      newNode.index = 0;
       newTree.children.set(newNode.name, newNode);
     }
+
+    [...node.children].forEach((child, index) => {
+      if (child[0] === search[1] && child[0] !== search[0]) {
+        child[1].index = index + (shouldUpdate ? 0 : 1)
+        const newSearch = [...search];
+        newSearch.shift();
+        newTree.children.set(
+          newNode.name,
+          updateNodeInTree(child[1], newNode, newSearch)
+        );
+      } else {
+        child[1].index = index + (shouldUpdate ? 0 : 1)
+        console.log(child)
+        newTree.children.set(child[0], child[1]);
+      }
+    });
   }
 
+  // copy old tree structure, performing recursive deep copy only when address matches update
+  if (search.length > 2) {
+    [...node.children].forEach((child, index) => {
+      if (child[0] === search[1]) {
+        const newSearch = [...search];
+        newSearch.shift();
+        child[1].index = index;
+        newTree.children.set(
+          child[0],
+          updateNodeInTree(child[1], newNode, newSearch)
+        );
+      } else {
+        child[1].index = index;
+        newTree.children.set(child[0], child[1]);
+      }
+    });
+  }
   return newTree;
 }
 
@@ -134,7 +160,7 @@ function updateNodesInTree(tree, newNodes) {
 }
 
 function copyNode(prev) {
-  const newNode = createNode(prev.name, prev.address);
+  const newNode = createNode(prev.name, [...prev.address], prev.index);
   return newNode;
 }
 
@@ -172,6 +198,7 @@ function initializeState(code) {
     addressMap: addressMap,
     focus: [["root"]],
     editing: false,
+    collapsed: false,
   };
   return state;
 }
@@ -179,14 +206,24 @@ function initializeState(code) {
 function deleteChild(parent, child, tree) {
   const newNode = copyNode(parent);
 
-  parent.children.forEach((c) => newNode.children.set(c.name, c));
-  newNode.children.delete(child.name);
-  console.log(newNode)
+  const parentKeys = [...parent.children.keys()];
+  const toRemove = parentKeys.indexOf(child.name);
+
+  const parentArray = [...parent.children];
+  parentArray.splice(toRemove, 1);
+
+  parentArray.forEach((entry, index) => {
+    entry[1].index = index;
+    console.log(entry);
+    newNode.children.set(entry[0], entry[1]);
+  });
   return updateNodeInTree(tree, newNode, parent.address);
 }
 
 function treeReducer(state, action) {
+
   switch (action.type) {
+
     case "initialize": {
       const newState = initializeState(action.code);
       return newState;
@@ -207,9 +244,10 @@ function treeReducer(state, action) {
 
     case "delete child": {
       const newTree = deleteChild(action.node, action.child, state.tree);
-      console.log(newTree)
       const newAddressMap = createAddressMap(newTree, new Map());
+      console.log(newTree);
       return {
+        ...state,
         focus: [action.node.address],
         addressMap: newAddressMap,
         tree: newTree,
@@ -251,22 +289,21 @@ function treeReducer(state, action) {
       const newName = state.addressMap.get(
         action.node.address.toString()
       ).inputName;
-
-      const newAddress = [...action.parent.address];
+      const parentAddress = getParentAddress(action.node.address)
+      const newAddress = [...parentAddress];
       newAddress.push(newName);
 
-      const newNode = createNode(newName, newAddress);
+      const newNode = createNode(newName, newAddress, action.node.index);
       action.node.children.forEach((child) =>
         newNode.children.set(child.name, child)
       );
 
-      const tempTree = deleteChild(action.parent, action.node, state.tree)
-      console.log(tempTree)
       const newTree = updateNodeInTree(
-        tempTree,
+        state.tree,
         updateAddresses(newNode, newAddress),
-        newAddress
+        action.node.address
       );
+      console.log(newTree);
       const newAddressMap = createAddressMap(newTree, new Map());
       // console.log(newTree);
       console.log(newAddressMap);
@@ -298,9 +335,9 @@ function treeReducer(state, action) {
 
       const search = [...action.address];
       search.push(parsedNodes.name);
-      console.log(search);
       const newNode = updateAddresses(parsedNodes, search);
       const newTree = updateNodeInTree(state.tree, newNode, search);
+      console.log(newTree);
       const newAddressMap = createAddressMap(newTree, new Map());
       return {
         ...state,
@@ -309,10 +346,22 @@ function treeReducer(state, action) {
       };
     }
 
-    // case "set collapse all": {
-    //   const newTree = updateChildrenVisibility(tree, action.displayChildren);
-    //   return newTree;
-    // }
+    case "set collapse all": {
+      console.log("collapse")
+      const newAddressMap = new Map();
+      state.addressMap.forEach((prev, address) => {
+        newAddressMap.set(address, {
+          ...prev,
+          display: state.collapsed,
+        })
+      })
+      console.log(newAddressMap)
+      return {
+        ...state,
+        collapsed: !state.collapsed,
+        addressMap: newAddressMap,
+      };
+    }
 
     case "focus node": {
       const newFocus = [...state.focus];

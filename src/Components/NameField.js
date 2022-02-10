@@ -58,7 +58,8 @@ const NameField = ({
 
 
   const submit = (e) => {
-    submitEdit(input);
+    e.preventDefault();
+    submitEdit();
   };
 
   const copyNode = (e) => {

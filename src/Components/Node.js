@@ -86,12 +86,16 @@ const Node = ({
     deleteFromParent(node);
   };
 
-  const updateNodeName = (input) => {
-    console.log(input)
+  const updateNodeName = () => {
     dispatch({
 			type: "submit name",
 		  node: node,
 			})
+      dispatch({
+        type: "edit name",
+        address: node.address,
+        edit: false,
+      })
 		};
 
   const submitInsert = (input) => {
@@ -159,7 +163,7 @@ const Node = ({
 						dispatch: dispatch,
             showTools: tools,
             edit: addressMap.get(node.address.toString()).editName,
-						submitEdit: updateNodeName,
+						submitEdit: e => updateNodeName(),
             submitInsert: submitInsert,
             deleteSelf: deleteSelf,
             displayInsert: displayInsert,
