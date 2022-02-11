@@ -38,7 +38,6 @@ const NameField = ({
   submitEdit,
   submitInsert,
   deleteSelf,
-  displayInsert,
 }) => {
   const [input, setInput] = useState(node.name);
 
@@ -79,6 +78,14 @@ const NameField = ({
       address: node.address,
     });
   };
+
+  function editNode(){
+    dispatch({
+        type: "edit node",
+        address: node.address,
+        edit: true,
+    })
+  }
 
   function editName() {
     dispatch({
@@ -126,7 +133,7 @@ const NameField = ({
             pasteNode: pasteNode,
             copyAddress: copyAddress,
             deleteSelf: deleteSelf,
-            displayInsert: displayInsert,
+            editNode: editNode,
           },
           null
         )

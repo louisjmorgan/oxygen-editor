@@ -36,34 +36,45 @@ const styles = {
 
 const Node = ({
   node,
-	dispatch,
+  dispatch,
   addressMap,
   findFocusIndex,
+  parentRef,
   focussed,
-	visible,
+  visible,
   displayChildren,
-	deleteFromParent,
+  deleteFromParent,
 }) => {
   const [tools, setTools] = useState(false);
-  const [insert, setInsert] = useState(false);
 
-	
+  const ref = useRef();
+
+  useEffect(() => {
+    if (focussed && parentRef) {
+      // parentRef.current.focus()
+    //   const y = parentRef.current.getBoundingClientRect().top;
+    //   window.scrollTo({top: y, behavior: "smooth"});
+    // }
+    ref.current.scrollIntoView()
+    }
+  }, [focussed, parentRef])
+  
+
   const toggleDisplayChildren = (e) => {
-    console.log(node.address)
-		dispatch({
+    console.log(node.address);
+    dispatch({
       type: "set display children",
       address: node.address,
       display: !displayChildren,
-    })
-	}
-  
+    });
+  };
 
   const deleteChild = (child) => {
     dispatch({
-			type: "delete child",
-			node: node,
-			child: child,
-		})
+      type: "delete child",
+      node: node,
+      child: child,
+    });
   };
 
   const displayTools = (e) => {
@@ -74,44 +85,43 @@ const Node = ({
     setTools(false);
   };
 
-  const displayInsert = (e) => {
-    setInsert(true);
-  };
-
-  const hideInsert = (e) => {
-    setInsert(false);
-  };
-
   const deleteSelf = (e) => {
     deleteFromParent(node);
   };
 
   const updateNodeName = () => {
     dispatch({
-			type: "submit name",
-		  node: node,
-			})
-      dispatch({
-        type: "edit name",
-        address: node.address,
-        edit: false,
-      })
-		};
+      type: "submit name",
+      node: node,
+    });
+    dispatch({
+      type: "edit name",
+      address: node.address,
+      edit: false,
+    });
+  };
 
   const submitInsert = (input) => {
     if (!input) {
-      hideInsert();
+      dispatch({
+        type: "edit node",
+        address: node.address,
+        edit: false,
+      });
       return;
     }
-		dispatch({
-			type: "paste node",
-			nodeString: input,
+    dispatch({
+      type: "paste node",
+      nodeString: input,
       address: node.address,
-		})
-    hideInsert();
+    });
+    dispatch({
+      type: "edit node",
+      address: node.address,
+      edit: false,
+    });
   };
 
- 
   const childNodes = [];
   node.children.forEach((child) => {
     childNodes.push(
@@ -122,6 +132,7 @@ const Node = ({
           dispatch: dispatch,
           addressMap: addressMap,
           visible: displayChildren,
+          parentRef: ref,
           displayChildren: addressMap.get(child.address.toString()).display,
           key: child.name,
           focussed: findFocusIndex(child.address),
@@ -133,18 +144,20 @@ const Node = ({
     );
   });
 
-
   return visible
     ? e(
         "div",
         { style: styles.node },
         e(
           "div",
-          {
-            style: {...styles.flex, outline: focussed > -1 ? "solid white 1px" : "none",},
+          { 
+            ref: ref,
+            style: {
+              ...styles.flex,
+              outline: focussed > -1 ? "solid white 1px" : "none",
+            },
             onMouseEnter: displayTools,
             onMouseLeave: hideTools,
-           
           },
           e(
             "button",
@@ -154,23 +167,24 @@ const Node = ({
                 opacity: node.children.size > 0 ? 1 : 0,
                 ...styles.collapseChildren,
               },
-							tabIndex: -1,
+              tabIndex: -1,
             },
             displayChildren ? "-" : "+"
           ),
           e(NameField, {
             node: node,
-						dispatch: dispatch,
+            dispatch: dispatch,
             showTools: tools,
             edit: addressMap.get(node.address.toString()).editName,
-						submitEdit: e => updateNodeName(),
+            submitEdit: (e) => updateNodeName(),
             submitInsert: submitInsert,
             deleteSelf: deleteSelf,
-            displayInsert: displayInsert,
           })
         ),
         e(InsertNodeField, {
-          active: insert,
+          node: node,
+          dispatch: dispatch,
+          active: addressMap.get(node.address.toString()).editNode,
           submitInsert: submitInsert,
         }),
         childNodes

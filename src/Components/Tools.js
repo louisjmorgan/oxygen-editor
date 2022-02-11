@@ -33,7 +33,7 @@ function Tools({
   pasteNode,
   copyAddress,
   deleteSelf,
-  displayInsert,
+  editNode,
 }) {
 
   return showTools
@@ -93,7 +93,7 @@ function Tools({
         e(
           "button",
           {
-            onClick: displayInsert,
+            onClick: editNode,
             style: {
               ...styles.toolButton,
             },

@@ -24,11 +24,16 @@ const styles = {
   },
 };
 
-const InsertNodeField = ({ active, submitInsert }) => {
+const InsertNodeField = ({ node, dispatch, active, submitInsert }) => {
   const [input, setInput] = useState("");
 
   const handleInput = (e) => {
-    setInput(e.target.value);
+    setInput(() => e.target.value);
+    dispatch({
+      type: "input node",
+      address: node.address,
+      input: e.target.value,
+    })
   };
 
   return active
@@ -36,6 +41,7 @@ const InsertNodeField = ({ active, submitInsert }) => {
         "div",
         null,
         e("textarea", {
+          autoFocus: true,
           style: styles.insertNode,
           value: input,
           onChange: handleInput,

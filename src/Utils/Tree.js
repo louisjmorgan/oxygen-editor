@@ -187,7 +187,9 @@ function createAddressMap(node, map) {
   const initial = {
     display: true,
     editName: false,
+    editNode: false,
     inputName: node.name,
+    inputNode: "",
   };
   map.set(node.address.toString(), initial);
   node.children.forEach((child) => {
@@ -206,7 +208,10 @@ function initializeState(code) {
     tree: tree,
     addressMap: addressMap,
     focus: [["root"]],
-    editing: false,
+    editing: {
+      name: false,
+      node: false,
+    },
     collapsed: false,
   };
   return state;
@@ -313,7 +318,10 @@ function treeReducer(state, action) {
       return {
         ...state,
         addressMap: newAddressMap,
-        editing: action.edit,
+        editing: {
+          ...state.editing,
+          name: action.edit,
+        }
       };
     }
 
@@ -329,7 +337,10 @@ function treeReducer(state, action) {
       return {
         ...state,
         addressMap: newAddressMap,
-        editing: true,
+        editing: {
+          ...state.editing,
+          name: true,
+        }
       };
     }
 
@@ -365,7 +376,46 @@ function treeReducer(state, action) {
         focus: [newAddress],
         addressMap: newAddressMap,
         tree: newTree,
-        editing: false,
+        editing: {
+          ...state.editing,
+          name: false,
+        }
+      };
+    }
+
+    case "edit node": {
+      const newAddressMap = new Map(state.addressMap);
+      const prev = state.addressMap.get(action.address.toString());
+      newAddressMap.set(action.address.toString(), {
+        ...prev,
+        editNode: action.edit,
+      });
+
+      return {
+        ...state,
+        addressMap: newAddressMap,
+        editing: {
+          ...state.editing,
+          node: action.edit,
+        }
+      };
+    }
+
+    case "input node": {
+      const newInput = action.input;
+      const newAddressMap = new Map(state.addressMap);
+      const prev = state.addressMap.get(action.address.toString());
+      newAddressMap.set(action.address.toString(), {
+        ...prev,
+        inputNode: newInput,
+      });
+      return {
+        ...state,
+        addressMap: newAddressMap,
+        editing: {
+          ...state.editing,
+          node: true,
+        }
       };
     }
 

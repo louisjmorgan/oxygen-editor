@@ -4,7 +4,12 @@
 import "./App.css";
 import React, { useState, useEffect, useRef, useReducer } from "react";
 import Node from "./Components/Node";
-import { treeReducer, getNodeFromTree, getParentAddress, getNextParent } from "./Utils/Tree";
+import {
+  treeReducer,
+  getNodeFromTree,
+  getParentAddress,
+  getNextParent,
+} from "./Utils/Tree";
 const e = React.createElement;
 
 const code =
@@ -78,6 +83,8 @@ const ALLOWED_KEYS = [
   "A",
   "e",
   "E",
+  "i",
+  "E",
   "Shift",
   "Control",
   "Alt",
@@ -106,7 +113,12 @@ function App() {
     const onKeyDown = (e) => {
       const key = e.key;
 
-      if ((key === " " && state.editing !== true) || key === "ArrowUp" || key === "ArrowDown") e.preventDefault();
+      if (
+        (key === " " && (state.editing.name || state.editing.node) !== true) ||
+        key === "ArrowUp" ||
+        key === "ArrowDown"
+      )
+        e.preventDefault();
 
       if (ALLOWED_KEYS.includes(key) && !pressedKeys.includes(key)) {
         setPressedKeys((previousPressedKeys) => [...previousPressedKeys, key]);
@@ -142,15 +154,14 @@ function App() {
     console.log(pressedKeys);
 
     if (pressedKeys[0]) {
-
-      if (state.editing) {
-        switch(pressedKeys[0].toString()) {
+      if (state.editing.name) {
+        switch (pressedKeys[0].toString()) {
           case "Enter": {
-            const node = getNodeFromTree(state.focus[0], state.tree)
+            const node = getNodeFromTree(state.focus[0], state.tree);
             dispatch({
               type: "submit name",
               node: node,
-            })
+            });
             return;
           }
 
@@ -159,14 +170,25 @@ function App() {
               type: "edit name",
               address: state.focus[0],
               edit: false,
-            })
+            });
+            return;
+          }
+        }
+      } else if (state.editing.node) {
+        switch (pressedKeys[0].toString()) {
+          case "Escape": {
+            dispatch({
+              type: "edit node",
+              address: state.focus[0],
+              edit: false,
+            });
             return;
           }
         }
       } else {
+        // key combinations
         if (pressedKeys[1]) {
-          
-          switch(pressedKeys.slice(0,2).toString()) {
+          switch (pressedKeys.slice(0, 2).toString()) {
             case "Alt,ArrowUp": {
               const node = getNodeFromTree(state.focus[0], state.tree);
               if (node.index > 0) {
@@ -174,33 +196,36 @@ function App() {
                   type: "shift order",
                   node: node,
                   direction: -1,
-                })
+                });
               }
               return;
             }
 
             case "Alt,ArrowDown": {
-              if (state.focus[0].toString() === 'root') return;
+              if (state.focus[0].toString() === "root") return;
               const node = getNodeFromTree(state.focus[0], state.tree);
-              const parent = getNodeFromTree(getParentAddress(state.focus[0]), state.tree)
+              const parent = getNodeFromTree(
+                getParentAddress(state.focus[0]),
+                state.tree
+              );
               if (node.index < parent.children.size - 1) {
                 dispatch({
                   type: "shift order",
                   node: node,
                   direction: 1,
-                })
+                });
               }
               return;
             }
 
             case "Alt,ArrowLeft": {
               const node = getNodeFromTree(state.focus[0], state.tree);
-              const parentAddress = getParentAddress(state.focus[0])
-              if (parentAddress.toString() === 'root') return;
+              const parentAddress = getParentAddress(state.focus[0]);
+              if (parentAddress.toString() === "root") return;
               dispatch({
                 type: "shift parent",
                 node: node,
-              })
+              });
               return;
             }
 
@@ -210,24 +235,28 @@ function App() {
                 dispatch({
                   type: "shift sibling",
                   node: node,
-                })
+                });
               }
               return;
             }
           }
         }
+
+        // single keys
         switch (pressedKeys[0].toString()) {
           case "ArrowRight": {
             const node = getNodeFromTree(state.focus[0], state.tree);
-            
-            if (node.children.size > 0 ) {
-              const displayChildren = state.addressMap.get(node.address.toString()).display;
+
+            if (node.children.size > 0) {
+              const displayChildren = state.addressMap.get(
+                node.address.toString()
+              ).display;
               if (displayChildren === false) {
                 dispatch({
                   type: "set display children",
                   address: node.address,
                   display: true,
-                })
+                });
               }
               dispatch({
                 type: "unfocus node",
@@ -239,22 +268,23 @@ function App() {
               });
             } else {
               const [superParent, parent] = getNextParent(node, state.tree);
-                if (parent.index < superParent.children.size - 1) {
-                  dispatch({
-                    type: "unfocus node",
-                    address: state.focus[0],
-                  });
-                  dispatch({
-                    type: "focus node",
-                    address: [...superParent.children][parent.index + 1][1].address,
-                  });
-                }
+              if (parent.index < superParent.children.size - 1) {
+                dispatch({
+                  type: "unfocus node",
+                  address: state.focus[0],
+                });
+                dispatch({
+                  type: "focus node",
+                  address: [...superParent.children][parent.index + 1][1]
+                    .address,
+                });
               }
+            }
             return;
           }
 
           case "ArrowLeft": {
-            if (state.focus[0].toString() === 'root') return;
+            if (state.focus[0].toString() === "root") return;
             const parentAddress = getParentAddress(state.focus[0]);
             dispatch({
               type: "unfocus node",
@@ -269,7 +299,7 @@ function App() {
 
           case "ArrowDown": {
             const node = getNodeFromTree(state.focus[0], state.tree);
-            if (state.focus[0].toString() === 'root') {
+            if (state.focus[0].toString() === "root") {
               dispatch({
                 type: "unfocus node",
                 address: state.focus[0],
@@ -280,7 +310,10 @@ function App() {
               });
               return;
             }
-            const parent = getNodeFromTree(getParentAddress(state.focus[0]), state.tree);
+            const parent = getNodeFromTree(
+              getParentAddress(state.focus[0]),
+              state.tree
+            );
             if (node.index < parent.children.size - 1) {
               dispatch({
                 type: "unfocus node",
@@ -292,25 +325,26 @@ function App() {
               });
             } else {
               const [superParent, parent] = getNextParent(node, state.tree);
-              console.log(parent)
-              if (parent.index < superParent.children.size - 1) {
+              console.log(parent);
+              if (node.children.size > 0) {
                 dispatch({
                   type: "unfocus node",
                   address: state.focus[0],
                 });
                 dispatch({
                   type: "focus node",
-                  address: [...superParent.children][parent.index + 1][1].address,
+                  address: node.children.values().next().value.address,
                 });
               } else {
-                if (node.children.size > 0) {
+                if (parent.index < superParent.children.size - 1) {
                   dispatch({
                     type: "unfocus node",
                     address: state.focus[0],
                   });
                   dispatch({
                     type: "focus node",
-                    address: node.children.values().next().value.address,
+                    address: [...superParent.children][parent.index + 1][1]
+                      .address,
                   });
                 }
               }
@@ -319,9 +353,12 @@ function App() {
           }
 
           case "ArrowUp": {
-            if (state.focus[0].toString() === 'root') return;
+            if (state.focus[0].toString() === "root") return;
             const node = getNodeFromTree(state.focus[0], state.tree);
-            const parent = getNodeFromTree(getParentAddress(state.focus[0]), state.tree);
+            const parent = getNodeFromTree(
+              getParentAddress(state.focus[0]),
+              state.tree
+            );
             if (node.index > 0) {
               dispatch({
                 type: "unfocus node",
@@ -346,7 +383,7 @@ function App() {
 
           case "Backspace": {
             state.focus.forEach((address) => {
-              if (address.toString() === "root") return
+              if (address.toString() === "root") return;
               const node = getNodeFromTree(address, state.tree);
               const parentAddress = getParentAddress(address);
               dispatch({
@@ -360,13 +397,13 @@ function App() {
 
           case " ": {
             state.focus.forEach((address) => {
-              const prev = state.addressMap.get(address.toString()).display
+              const prev = state.addressMap.get(address.toString()).display;
               dispatch({
                 type: "set display children",
                 address: address,
                 display: !prev,
-              })
-            })
+              });
+            });
             return;
           }
 
@@ -391,7 +428,7 @@ function App() {
                   nodeString: text,
                 })
               );
-            })
+            });
             return;
           }
 
@@ -400,8 +437,8 @@ function App() {
               dispatch({
                 type: "copy address",
                 address: address,
-              })
-            })
+              });
+            });
             return;
           }
 
@@ -410,7 +447,17 @@ function App() {
               type: "edit name",
               address: state.focus[0],
               edit: true,
-            })
+            });
+            return;
+          }
+
+          case "Enter": {
+            dispatch({
+              type: "edit node",
+              address: state.focus[0],
+              edit: true,
+            });
+            return;
           }
         }
       }
@@ -450,7 +497,8 @@ function App() {
             focussed: findFocusIndex(state.tree.address),
             findFocusIndex: findFocusIndex,
             addressMap: state.addressMap,
-            displayChildren: state.addressMap.get(state.tree.address.toString()).display,
+            displayChildren: state.addressMap.get(state.tree.address.toString())
+              .display,
             visible: true,
             dispatch: dispatch,
           })}
