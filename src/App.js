@@ -4,7 +4,7 @@
 import "./App.css";
 import React, { useState, useEffect, useRef, useReducer } from "react";
 import Node from "./Components/Node";
-import { treeReducer, getNodeFromTree, initializeState } from "./Utils/Tree";
+import { treeReducer, getNodeFromTree, getParentAddress } from "./Utils/Tree";
 const e = React.createElement;
 
 const code =
@@ -83,6 +83,14 @@ const ALLOWED_KEYS = [
   "Alt",
 ];
 
+function getNextParent(node, tree) {
+  console.log(node)
+  const parent = getNodeFromTree(getParentAddress(node.address), tree)
+  if (parent.address.toString() === 'root') return [parent, node]
+  if (node.index < parent.children.size - 1) return [parent, node];
+  else return getNextParent(parent, tree);
+}
+
 function App() {
   const [state, dispatch] = useReducer(treeReducer, {
     tree: null,
@@ -106,7 +114,7 @@ function App() {
     const onKeyDown = (e) => {
       const key = e.key;
 
-      if (key === " " || key === "ArrowUp" || key === "ArrowDown") e.preventDefault();
+      if ((key === " " && state.editing !== true) || key === "ArrowUp" || key === "ArrowDown") e.preventDefault();
 
       if (ALLOWED_KEYS.includes(key) && !pressedKeys.includes(key)) {
         setPressedKeys((previousPressedKeys) => [...previousPressedKeys, key]);
@@ -130,16 +138,6 @@ function App() {
     };
   }, [pressedKeys]);
 
-  function getParentAddress(address) {
-    const length = address.length;
-    if (length > 1) {
-      const newAddress = address.filter((elem, i) => i !== length - 1);
-      return newAddress;
-    } else {
-      return null;
-    }
-  }
-
   function findFocusIndex(address) {
     let index = -1;
     state.focus.forEach((item, i) => {
@@ -149,14 +147,13 @@ function App() {
   }
 
   useEffect(() => {
-    console.log(pressedKeys);
+    console.log(pressedKeys.toString());
 
 
     if (state.editing) {
       switch(pressedKeys.toString()) {
         case "Enter": {
           const node = getNodeFromTree(state.focus[0], state.tree)
-          const parent = getNodeFromTree(getParentAddress(state.focus[0]), state.tree)
           dispatch({
             type: "submit name",
             node: node,
@@ -174,6 +171,7 @@ function App() {
         }
       }
     } else {
+
       switch (pressedKeys.toString()) {
         case "ArrowRight": {
           const node = getNodeFromTree(state.focus[0], state.tree);
@@ -195,26 +193,39 @@ function App() {
               type: "focus node",
               address: node.children.values().next().value.address,
             });
-          }
+          } else {
+            const [superParent, parent] = getNextParent(node, state.tree);
+              if (parent.index < superParent.children.size - 1) {
+                dispatch({
+                  type: "unfocus node",
+                  address: state.focus[0],
+                });
+                dispatch({
+                  type: "focus node",
+                  address: [...superParent.children][parent.index + 1][1].address,
+                });
+              }
+            }
           return;
         }
 
         case "ArrowLeft": {
+          if (state.focus[0].toString() === 'root') return;
           const parentAddress = getParentAddress(state.focus[0]);
-          if (parentAddress) {
-            dispatch({
-              type: "unfocus node",
-              address: state.focus[0],
-            });
-            dispatch({
-              type: "focus node",
-              address: parentAddress,
-            });
-          }
+          dispatch({
+            type: "unfocus node",
+            address: state.focus[0],
+          });
+          dispatch({
+            type: "focus node",
+            address: parentAddress,
+          });
           return;
         }
 
         case "ArrowDown": {
+          if (state.focus[0].toString() === 'root') return;
+
           const node = getNodeFromTree(state.focus[0], state.tree);
           const parent = getNodeFromTree(getParentAddress(state.focus[0]), state.tree);
           if (node.index < parent.children.size - 1) {
@@ -226,6 +237,19 @@ function App() {
               type: "focus node",
               address: [...parent.children][node.index + 1][1].address,
             });
+          } else {
+            const [superParent, parent] = getNextParent(node, state.tree);
+            console.log(parent)
+            if (parent.index < superParent.children.size - 1) {
+              dispatch({
+                type: "unfocus node",
+                address: state.focus[0],
+              });
+              dispatch({
+                type: "focus node",
+                address: [...superParent.children][parent.index + 1][1].address,
+              });
+            }
           }
           return;
         }
@@ -242,6 +266,32 @@ function App() {
               type: "focus node",
               address: [...parent.children][node.index - 1][1].address,
             });
+          }
+          return;
+        }
+
+        case "Shift,ArrowUp": {
+          const node = getNodeFromTree(state.focus[0], state.tree);
+          if (node.index > 0) {
+            dispatch({
+              type: "shift",
+              node: node,
+              direction: -1,
+            })
+          }
+          return;
+        }
+
+        case "Shift,ArrowDown": {
+          if (state.focus[0].toString() === 'root') return;
+          const node = getNodeFromTree(state.focus[0], state.tree);
+          const parent = getNodeFromTree(getParentAddress(state.focus[0]), state.tree)
+          if (node.index < parent.children.size - 1) {
+            dispatch({
+              type: "shift",
+              node: node,
+              direction: 1,
+            })
           }
           return;
         }

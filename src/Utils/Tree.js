@@ -229,6 +229,25 @@ function treeReducer(state, action) {
       return newState;
     }
 
+    case "focus node": {
+      const newFocus = [...state.focus];
+      newFocus.unshift(action.address);
+      return {
+        ...state,
+        focus: newFocus,
+      };
+    }
+
+    case "unfocus node": {
+      const newFocus = [...state.focus];
+      const index = newFocus.indexOf(action.address);
+      if (index > -1) newFocus.splice(index, 1);
+      return {
+        ...state,
+        focus: newFocus,
+      };
+    }
+
     case "set display children": {
       const newAddressMap = new Map(state.addressMap);
       const prev = state.addressMap.get(action.address.toString());
@@ -236,8 +255,28 @@ function treeReducer(state, action) {
         ...prev,
         display: action.display,
       });
+      let newCollapsed = true;
+      if (state.collapsed === true) newCollapsed = false;
       return {
         ...state,
+        collapsed: newCollapsed,
+        addressMap: newAddressMap,
+      };
+    }
+
+    case "set collapse all": {
+      console.log("collapse")
+      const newAddressMap = new Map();
+      state.addressMap.forEach((prev, address) => {
+        newAddressMap.set(address, {
+          ...prev,
+          display: state.collapsed,
+        })
+      })
+      console.log(newAddressMap)
+      return {
+        ...state,
+        collapsed: !state.collapsed,
         addressMap: newAddressMap,
       };
     }
@@ -305,8 +344,12 @@ function treeReducer(state, action) {
       );
       console.log(newTree);
       const newAddressMap = createAddressMap(newTree, new Map());
-      // console.log(newTree);
-      console.log(newAddressMap);
+
+      state.addressMap.forEach((prev, address) => {
+        newAddressMap.set(address, {
+          ...prev,
+        })
+      })
 
       return {
         ...state,
@@ -338,7 +381,13 @@ function treeReducer(state, action) {
       const newNode = updateAddresses(parsedNodes, search);
       const newTree = updateNodeInTree(state.tree, newNode, search);
       console.log(newTree);
+
       const newAddressMap = createAddressMap(newTree, new Map());
+      state.addressMap.forEach((prev, address) => {
+        newAddressMap.set(address, {
+          ...prev,
+        })
+      })
       return {
         ...state,
         addressMap: newAddressMap,
@@ -346,42 +395,54 @@ function treeReducer(state, action) {
       };
     }
 
-    case "set collapse all": {
-      console.log("collapse")
-      const newAddressMap = new Map();
+    
+    case "shift": {
+      const newIndex = action.node.index + action.direction;
+      const oldIndex = action.node.index;
+
+      const parent = getNodeFromTree(getParentAddress(action.node.address), state.tree)
+      const sibling = [...parent.children][newIndex]
+
+      const search = [...parent.address].slice(parent.address.length - 1, parent.address.length)
+
+      // replace sibling with temporary node
+      search.push(sibling[0])
+      const tempNode = createNode("temp");
+      let tempParent = updateNodeInTree(parent, tempNode, search)
+      
+      // replace focussed node with sibling
+      search.pop()
+      search.push(action.node.name);
+      const newSibling = createNode(sibling[0], sibling[1].address, oldIndex)
+      sibling[1].children.forEach((child) => {
+        newSibling.children.set(child.name, child);
+      })
+      tempParent = updateNodeInTree(tempParent, newSibling, search);
+
+      // replace temporary node with focussed node
+      search.pop()
+      search.push("temp")
+      const newNode = createNode(action.node.name, action.node.address, newIndex )
+      action.node.children.forEach((child) => {
+        newNode.children.set(child.name, child);
+      })
+      const newParent = updateNodeInTree(tempParent, newNode, search);
+      
+      const newTree = updateNodeInTree(state.tree, newParent, parent.address);
+      const newAddressMap = createAddressMap(newTree, new Map());
       state.addressMap.forEach((prev, address) => {
         newAddressMap.set(address, {
           ...prev,
-          display: state.collapsed,
         })
       })
-      console.log(newAddressMap)
+      
       return {
         ...state,
-        collapsed: !state.collapsed,
+        tree: newTree,
         addressMap: newAddressMap,
-      };
-    }
-
-    case "focus node": {
-      const newFocus = [...state.focus];
-      newFocus.unshift(action.address);
-      return {
-        ...state,
-        focus: newFocus,
-      };
-    }
-
-    case "unfocus node": {
-      const newFocus = [...state.focus];
-      const index = newFocus.indexOf(action.address);
-      if (index > -1) newFocus.splice(index, 1);
-      return {
-        ...state,
-        focus: newFocus,
-      };
+      }
     }
   }
 }
 
-export { initializeState, getNodeFromTree, treeReducer };
+export { initializeState, getNodeFromTree, getParentAddress, treeReducer };
