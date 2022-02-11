@@ -55,9 +55,9 @@ const Node = ({
     //   const y = parentRef.current.getBoundingClientRect().top;
     //   window.scrollTo({top: y, behavior: "smooth"});
     // }
-    ref.current.scrollIntoView()
+    // ref.current.scrollIntoView()
     }
-  }, [focussed, parentRef])
+  }, [focussed])
   
 
   const toggleDisplayChildren = (e) => {
