@@ -95,6 +95,7 @@ function App() {
     tree: null,
     addressMap: null,
     focus: null,
+    editing: null,
   });
 
   const [isLoaded, setLoaded] = useState(false);
@@ -112,14 +113,14 @@ function App() {
   useEffect(() => {
     const onKeyDown = (e) => {
       const key = e.key;
-
+      console.log(state.editing)
       if (
-        (key === " " && (state.editing.name || state.editing.node) !== true) ||
+        (key === " " && state.editing.name === false) ||
         key === "ArrowUp" ||
         key === "ArrowDown"
-      )
+      ) {
         e.preventDefault();
-
+      }
       if (ALLOWED_KEYS.includes(key) && !pressedKeys.includes(key)) {
         setPressedKeys((previousPressedKeys) => [...previousPressedKeys, key]);
       }
@@ -140,7 +141,7 @@ function App() {
       document.removeEventListener("keydown", onKeyDown);
       document.removeEventListener("keyup", onKeyUp);
     };
-  }, []);
+  }, [state.editing]);
 
   function findFocusIndex(address) {
     let index = -1;
@@ -396,6 +397,7 @@ function App() {
           }
 
           case " ": {
+            console.log("cum")
             state.focus.forEach((address) => {
               const prev = state.addressMap.get(address.toString()).display;
               dispatch({
