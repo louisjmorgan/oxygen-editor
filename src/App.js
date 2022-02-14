@@ -148,14 +148,6 @@ function App() {
     };
   }, [state.editing]);
 
-  function findFocusIndex(address) {
-    let index = -1;
-    state.focus.forEach((item, i) => {
-      if (item.toString() === address.toString()) index = i;
-    });
-    return index;
-  }
-
   useEffect(() => {
     console.log(pressedKeys);
 
@@ -538,11 +530,13 @@ function App() {
     setCollapse(!collapsed);
   }
 
-  // function updateDisplay(address, display) {
-  //   console.log(display)
-
-  //   return;
-  // }
+  function findFocusIndex(address) {
+    let index = -1;
+    state.focus.forEach((item, i) => {
+      if (item.toString() === address.toString()) index = i;
+    });
+    return index;
+  }
 
   return (
     <div className="App">

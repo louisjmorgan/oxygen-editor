@@ -206,6 +206,7 @@ const Node = ({
           dispatch: dispatch,
           active: addressMap.get(node.address.toString()).editNode,
           target: addressMap.get(node.address.toString()).insertTarget,
+          input: addressMap.get(node.address.toString()).inputNode,
           submitInsertChild: submitInsertChild,
           submitInsertSibling: submitInsertSibling,
         }),

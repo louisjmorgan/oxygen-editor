@@ -498,8 +498,13 @@ function treeReducer(state, action) {
       newAddressMap.forEach((value, address) => {
         const prev = state.addressMap.get(address);
         if (prev)
-          newAddressMap.set(address, { ...state.addressMap.get(address) });
+          newAddressMap.set(address, { 
+            ...state.addressMap.get(address),
+            inputNode: "", 
+          });
       });
+
+      console.log(newAddressMap);
       return {
         ...state,
         focus: [search],
@@ -528,8 +533,20 @@ function treeReducer(state, action) {
       newAddressMap.forEach((value, address) => {
         const prev = state.addressMap.get(address);
         if (prev)
-          newAddressMap.set(address, { ...state.addressMap.get(address) });
+          newAddressMap.set(address, { 
+            ...state.addressMap.get(address),
+            inputNode: "", 
+          });
       });
+   
+      if (state.addressMap.get(action.address.toString()).display === false) {
+        const prev = state.addressMap.get(action.address.toString());
+        newAddressMap.set(action.address.toString(), {
+          ...prev,
+          inputNode: "",
+          display: true,
+        })
+      }
 
       return {
         ...state,

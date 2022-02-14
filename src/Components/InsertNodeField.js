@@ -24,17 +24,15 @@ const styles = {
   },
 };
 
-const InsertNodeField = ({ node, dispatch, active, target, submitInsertChild, submitInsertSibling }) => {
-  const [input, setInput] = useState("");
+const InsertNodeField = ({ node, dispatch, input, active, target, submitInsertChild, submitInsertSibling }) => {
+  // const [input, setInput] = useState("");
 
   const handleSubmit = (e) =>{
-    console.log(target)
     if (target === "child") submitInsertChild(input);
     if (target === "sibling") submitInsertSibling(input);
   } 
 
   const handleInput = (e) => {
-    setInput(() => e.target.value);
     dispatch({
       type: "input node",
       address: node.address,
