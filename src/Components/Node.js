@@ -50,11 +50,11 @@ const Node = ({
   const ref = useRef();
 
   useEffect(() => {
-    if (focussed && parentRef) {
-      // parentRef.current.focus()
-    //   const y = parentRef.current.getBoundingClientRect().top;
-    //   window.scrollTo({top: y, behavior: "smooth"});
-    // }
+    if (focussed) {
+      ref.current.focus()
+      console.log("focus")
+      // const y = parentRef.current.getBoundingClientRect().top;
+      // window.scrollTo({top: y, behavior: "smooth"});
     // ref.current.scrollIntoView()
     }
   }, [focussed])
@@ -101,7 +101,7 @@ const Node = ({
     });
   };
 
-  const submitInsert = (input) => {
+  const submitInsertSibling = (input) => {
     if (!input) {
       dispatch({
         type: "edit node",
@@ -111,7 +111,28 @@ const Node = ({
       return;
     }
     dispatch({
-      type: "paste node",
+      type: "paste sibling",
+      nodeString: input,
+      node: node,
+    });
+    dispatch({
+      type: "edit node",
+      address: node.address,
+      edit: false,
+    });
+  };
+
+  const submitInsertChild = (input) => {
+    if (!input) {
+      dispatch({
+        type: "edit node",
+        address: node.address,
+        edit: false,
+      });
+      return;
+    }
+    dispatch({
+      type: "paste child",
       nodeString: input,
       address: node.address,
     });
@@ -132,7 +153,6 @@ const Node = ({
           dispatch: dispatch,
           addressMap: addressMap,
           visible: displayChildren,
-          parentRef: ref,
           displayChildren: addressMap.get(child.address.toString()).display,
           key: child.name,
           focussed: findFocusIndex(child.address),
@@ -177,7 +197,7 @@ const Node = ({
             showTools: tools,
             edit: addressMap.get(node.address.toString()).editName,
             submitEdit: (e) => updateNodeName(),
-            submitInsert: submitInsert,
+            submitInsertChild: submitInsertChild,
             deleteSelf: deleteSelf,
           })
         ),
@@ -185,7 +205,9 @@ const Node = ({
           node: node,
           dispatch: dispatch,
           active: addressMap.get(node.address.toString()).editNode,
-          submitInsert: submitInsert,
+          target: addressMap.get(node.address.toString()).insertTarget,
+          submitInsertChild: submitInsertChild,
+          submitInsertSibling: submitInsertSibling,
         }),
         childNodes
       )

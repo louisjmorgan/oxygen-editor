@@ -36,7 +36,7 @@ const NameField = ({
   showTools,
   edit,
   submitEdit,
-  submitInsert,
+  submitInsertChild,
   deleteSelf,
 }) => {
   const [input, setInput] = useState(node.name);
@@ -69,7 +69,7 @@ const NameField = ({
   };
 
   const pasteNode = (e) => {
-    navigator.clipboard.readText().then((text) => submitInsert(text));
+    navigator.clipboard.readText().then((text) => submitInsertChild(text));
   };
 
   const copyAddress = (e) => {

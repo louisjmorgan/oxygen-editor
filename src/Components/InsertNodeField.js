@@ -4,7 +4,7 @@ const e = React.createElement;
 
 const styles = {
   insertNode: {
-    marginLeft: "6em",
+
   },
 
   saveButton: {
@@ -24,8 +24,14 @@ const styles = {
   },
 };
 
-const InsertNodeField = ({ node, dispatch, active, submitInsert }) => {
+const InsertNodeField = ({ node, dispatch, active, target, submitInsertChild, submitInsertSibling }) => {
   const [input, setInput] = useState("");
+
+  const handleSubmit = (e) =>{
+    console.log(target)
+    if (target === "child") submitInsertChild(input);
+    if (target === "sibling") submitInsertSibling(input);
+  } 
 
   const handleInput = (e) => {
     setInput(() => e.target.value);
@@ -40,16 +46,16 @@ const InsertNodeField = ({ node, dispatch, active, submitInsert }) => {
     ? e(
         "div",
         null,
-        e("textarea", {
+        e("input", {
           autoFocus: true,
-          style: styles.insertNode,
+          style: {marginLeft: target === "child" ? "6em": "2.5em" ,...styles.insertNode},
           value: input,
           onChange: handleInput,
         }),
         e(
           "button",
           {
-            onClick: (e) => submitInsert(input),
+            onClick: handleSubmit,
             style: {
               ...styles.saveButton,
             },
@@ -57,7 +63,7 @@ const InsertNodeField = ({ node, dispatch, active, submitInsert }) => {
           "💾"
         )
       )
-    : "";
+    : null;
 };
 
 export default InsertNodeField;

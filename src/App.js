@@ -74,6 +74,7 @@ const ALLOWED_KEYS = [
   "Backspace",
   "Enter",
   "Escape",
+  "Tab",
   " ",
   "c",
   "C",
@@ -113,15 +114,19 @@ function App() {
   useEffect(() => {
     const onKeyDown = (e) => {
       const key = e.key;
+      console.log(e.key);
       console.log(state.editing)
-      if (
-        (key === " " && state.editing.name === false) ||
+      if (key === "Enter") e.preventDefault();
+      if (key === "Tab" || key === "Enter" || (
+        (state.editing.name !== true && state.editing.node !== true) &&
+        (key === " " ||
         key === "ArrowUp" ||
-        key === "ArrowDown"
-      ) {
+        key === "ArrowDown")
+      )) {
         e.preventDefault();
       }
-      if (ALLOWED_KEYS.includes(key) && !pressedKeys.includes(key)) {
+      // && !pressedKeys.includes(key)
+      if (ALLOWED_KEYS.includes(key)) {
         setPressedKeys((previousPressedKeys) => [...previousPressedKeys, key]);
       }
     };
@@ -177,12 +182,57 @@ function App() {
         }
       } else if (state.editing.node) {
         switch (pressedKeys[0].toString()) {
+          case "Enter": {
+            const node = getNodeFromTree(state.focus[0], state.tree);
+            const input = state.addressMap.get(state.focus[0].toString())
+            if (!input) {
+              dispatch({
+                type: "edit node",
+                address: node.address,
+                edit: false,
+              });
+              return;
+            }
+            if (input.insertTarget === "sibling") {
+              dispatch({
+                type: "paste sibling",
+                nodeString: input.inputNode,
+                node: node,
+              });
+            }
+            else if (input.insertTarget === "child") {
+              dispatch({
+                type: "paste child",
+                nodeString: input.inputNode,
+                address: node.address,
+              });
+            }
+            dispatch({
+              type: "edit node",
+              address: node.address,
+              edit: false,
+            });
+            return;
+          };
+          
           case "Escape": {
             dispatch({
               type: "edit node",
               address: state.focus[0],
               edit: false,
             });
+            return;
+          }
+          case "Tab": {
+            const prev = state.addressMap.get(state.focus[0].toString()).insertTarget;
+            let newTarget;
+            if (prev === "child") newTarget = "sibling";
+            if (prev === "sibling") newTarget = "child";
+            dispatch({
+              type: "change insert target",
+              address: state.focus[0],
+              target: newTarget,
+            })
             return;
           }
         }
@@ -397,7 +447,6 @@ function App() {
           }
 
           case " ": {
-            console.log("cum")
             state.focus.forEach((address) => {
               const prev = state.addressMap.get(address.toString()).display;
               dispatch({
@@ -425,7 +474,7 @@ function App() {
               const node = getNodeFromTree(address, state.tree);
               navigator.clipboard.readText().then((text) =>
                 dispatch({
-                  type: "paste node",
+                  type: "paste child",
                   address: address,
                   nodeString: text,
                 })
