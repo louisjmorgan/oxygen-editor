@@ -305,7 +305,7 @@ function App() {
               if (displayChildren === false) {
                 dispatch({
                   type: "set display children",
-                  address: node.address,
+                  node: node,
                   display: true,
                 });
               }
@@ -378,6 +378,16 @@ function App() {
               const [superParent, parent] = getNextParent(node, state.tree);
               console.log(parent);
               if (node.children.size > 0) {
+                const displayChildren = state.addressMap.get(
+                  node.address.toString()
+                ).display;
+                if (displayChildren === false) {
+                  dispatch({
+                    type: "set display children",
+                    node: node,
+                    display: true,
+                  });
+                }
                 dispatch({
                   type: "unfocus node",
                   address: state.focus[0],
@@ -448,10 +458,11 @@ function App() {
 
           case " ": {
             state.focus.forEach((address) => {
+              const node = getNodeFromTree(address, state.tree);
               const prev = state.addressMap.get(address.toString()).display;
               dispatch({
                 type: "set display children",
-                address: address,
+                node: node,
                 display: !prev,
               });
             });

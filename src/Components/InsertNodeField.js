@@ -4,7 +4,7 @@ const e = React.createElement;
 
 const styles = {
   insertNode: {
-
+    marginTop: "0.5em",
   },
 
   saveButton: {

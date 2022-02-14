@@ -49,22 +49,22 @@ const Node = ({
 
   const ref = useRef();
 
-  useEffect(() => {
-    if (focussed) {
-      ref.current.focus()
-      console.log("focus")
-      // const y = parentRef.current.getBoundingClientRect().top;
-      // window.scrollTo({top: y, behavior: "smooth"});
-    // ref.current.scrollIntoView()
-    }
-  }, [focussed])
+  // useEffect(() => {
+  //   if (focussed) {
+  //     ref.current.focus()
+  //     console.log("focus")
+  //     // const y = parentRef.current.getBoundingClientRect().top;
+  //     // window.scrollTo({top: y, behavior: "smooth"});
+  //   // ref.current.scrollIntoView()
+  //   }
+  // }, [focussed])
   
 
   const toggleDisplayChildren = (e) => {
     console.log(node.address);
     dispatch({
       type: "set display children",
-      address: node.address,
+      node: node,
       display: !displayChildren,
     });
   };
