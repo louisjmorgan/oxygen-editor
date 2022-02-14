@@ -109,6 +109,7 @@ function App() {
     if (action.type === "undo") {
       if (history[0].tree) {
         const newState = history[0]
+        setHistory((prev) => prev.splice(0,1))
         dispatchTree({
           type: "replace state",
           newState: newState,
