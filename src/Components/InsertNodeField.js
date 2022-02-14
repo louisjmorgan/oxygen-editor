@@ -25,7 +25,6 @@ const styles = {
 };
 
 const InsertNodeField = ({ node, dispatch, input, active, target, submitInsertChild, submitInsertSibling }) => {
-  // const [input, setInput] = useState("");
 
   const handleSubmit = (e) =>{
     if (target === "child") submitInsertChild(input);

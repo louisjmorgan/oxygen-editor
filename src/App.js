@@ -9,7 +9,8 @@ import {
   getNodeFromTree,
   getParentAddress,
   getNextParent,
-} from "./Utils/Tree";
+} from "./Model/Tree";
+
 const e = React.createElement;
 
 const code =
@@ -86,19 +87,39 @@ const ALLOWED_KEYS = [
   "E",
   "i",
   "E",
+  "z",
+  "Z",
   "Shift",
   "Control",
   "Alt",
 ];
 
+
 function App() {
-  const [state, dispatch] = useReducer(treeReducer, {
+  const [state, dispatchTree] = useReducer(treeReducer, {
     tree: null,
     addressMap: null,
     focus: null,
     editing: null,
   });
 
+  const [history, setHistory] = useState([]);
+
+  const dispatch = (action) => {
+    if (action.type === "undo") {
+      if (history[0].tree) {
+        const newState = history[0]
+        dispatchTree({
+          type: "replace state",
+          newState: newState,
+        })
+      }
+    }  else {
+      setHistory((prev) => [state, ...prev])
+      dispatchTree(action)
+    }
+
+  }
   const [isLoaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -281,6 +302,10 @@ function App() {
                 });
               }
               return;
+            }
+            
+            case "Control,z": {
+              dispatch({type: "undo"})
             }
           }
         }
@@ -530,6 +555,12 @@ function App() {
     setCollapse(!collapsed);
   }
 
+  function undo(){
+    dispatch({
+      type: "undo"
+    })
+  }
+
   function findFocusIndex(address) {
     let index = -1;
     state.focus.forEach((item, i) => {
@@ -546,6 +577,11 @@ function App() {
             "button",
             { onClick: collapseAll, style: styles.collapseAll },
             "collapse all"
+          )}
+          {e(
+            "button",
+            { onClick: undo, style: styles.collapseAll },
+            "undo"
           )}
           {e(Node, {
             node: state.tree,

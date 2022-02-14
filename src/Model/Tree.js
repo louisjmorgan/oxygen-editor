@@ -266,6 +266,10 @@ function treeReducer(state, action) {
       return newState;
     }
 
+    case "replace state": {
+      return action.newState;
+    }
+
     case "focus node": {
       const newFocus = [...state.focus];
       newFocus.unshift(action.address);
