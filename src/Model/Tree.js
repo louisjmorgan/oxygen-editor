@@ -101,7 +101,6 @@ function updateNodeInTree(node, newNode, address, insertionIndex = 0) {
   const search = [...address];
   if (search.length === 1) return newNode;
 
-  // create empty node to populate from old version
   const newTree = createNode(address[0], [...node.address], node.index);
 
   if (search.length === 2) {
@@ -158,13 +157,6 @@ function updateNodeInTree(node, newNode, address, insertionIndex = 0) {
       }
     });
   }
-  return newTree;
-}
-
-function updateNodesInTree(tree, newNodes) {
-  const newTree = newNodes.reduce((prevTree, newNode) => {
-    return updateNodeInTree(prevTree, newNode, newNode.address);
-  }, tree);
   return newTree;
 }
 

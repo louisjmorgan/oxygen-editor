@@ -4,7 +4,7 @@
 import "./App.css";
 import React, { useState, useEffect, useRef, useReducer } from "react";
 import Node from "./Components/Node";
-import commands from "./Components/Settings/commands";
+import commands from "./Settings/commands";
 import {
   treeReducer,
   getNodeFromTree,
