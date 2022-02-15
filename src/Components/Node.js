@@ -61,7 +61,6 @@ const Node = ({
   
 
   const toggleDisplayChildren = (e) => {
-    console.log(node.address);
     dispatch({
       type: "set display children",
       node: node,
@@ -93,11 +92,6 @@ const Node = ({
     dispatch({
       type: "submit name",
       node: node,
-    });
-    dispatch({
-      type: "edit name",
-      address: node.address,
-      edit: false,
     });
   };
 

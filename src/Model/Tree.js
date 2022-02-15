@@ -108,7 +108,6 @@ function updateNodeInTree(node, newNode, address, insertionIndex = 0) {
     let shouldUpdate = [...node.children].reduce((prev, child) => {
       return (child[0] === search[1] && child[0] !== search[0]) || prev;
     }, false);
-    console.log(shouldUpdate);
 
     if (node.children.size === 0) {
       newNode.index = 0;
@@ -132,7 +131,6 @@ function updateNodeInTree(node, newNode, address, insertionIndex = 0) {
         );
       } else {
         child[1].index = index + insertOffset;
-        console.log(child);
         newTree.children.set(child[0], child[1]);
       }
     });
@@ -186,7 +184,6 @@ function getParentAddress(address) {
 }
 
 function getNextParent(node, tree) {
-  console.log(node);
   const parent = getNodeFromTree(getParentAddress(node.address), tree);
   if (parent.address.toString() === "root") return [parent, node];
   if (node.index < parent.children.size - 1) return [parent, node];
@@ -212,9 +209,7 @@ function createAddressMap(node, map) {
 
 function initializeState(code) {
   const tree = parseNodes(code);
-  console.log(tree);
   const addressMap = createAddressMap(tree, new Map());
-  console.log(addressMap);
   const state = {
     tree: tree,
     addressMap: addressMap,
@@ -239,7 +234,6 @@ function deleteChild(parent, child, tree) {
 
   parentArray.forEach((entry, index) => {
     entry[1].index = index;
-    console.log(entry);
     newNode.children.set(entry[0], entry[1]);
   });
   return updateNodeInTree(tree, newNode, parent.address);
@@ -300,7 +294,7 @@ function treeReducer(state, action) {
           display: action.display,
         });
       }
-      console.log(newAddressMap);
+
       let collapsed = false;
       if (action.node.address.toString()  === "root") collapsed = true;
       return {
@@ -311,7 +305,6 @@ function treeReducer(state, action) {
     }
 
     case "set collapse all": {
-      console.log("collapse");
       const newAddressMap = new Map(state.addressMap);
       newAddressMap.forEach((value, address) => {
         newAddressMap.set(address, {
@@ -319,7 +312,6 @@ function treeReducer(state, action) {
           display: state.collapsed,
         });
       });
-      console.log(state.collapsed);
       return {
         ...state,
         collapsed: !state.collapsed,
@@ -370,14 +362,10 @@ function treeReducer(state, action) {
         ...prev,
         inputName: newInput,
       });
-      console.log(newInput);
+
       return {
         ...state,
         addressMap: newAddressMap,
-        editing: {
-          ...state.editing,
-          name: true,
-        },
       };
     }
 
@@ -399,14 +387,20 @@ function treeReducer(state, action) {
         updateAddresses(newNode, newAddress),
         action.node.address
       );
-      console.log(newTree);
-      const newAddressMap = createAddressMap(newTree, new Map());
 
+      const newAddressMap = createAddressMap(newTree, new Map());
       newAddressMap.forEach((value, address) => {
         const prev = state.addressMap.get(address);
         if (prev)
           newAddressMap.set(address, { ...state.addressMap.get(address) });
       });
+
+      const prev = newAddressMap.get(newAddress.toString())
+      newAddressMap.set(newAddress.toString(), {
+        ...prev,
+        editName: false,
+      })
+      console.log(newAddressMap)
 
       return {
         ...state,
@@ -450,10 +444,6 @@ function treeReducer(state, action) {
       return {
         ...state,
         addressMap: newAddressMap,
-        editing: {
-          ...state.editing,
-          node: true,
-        },
       };
     }
 
@@ -508,7 +498,6 @@ function treeReducer(state, action) {
           });
       });
 
-      console.log(newAddressMap);
       return {
         ...state,
         focus: [search],
@@ -531,14 +520,13 @@ function treeReducer(state, action) {
       search.push(parsedNodes.name);
       const newNode = updateAddresses(parsedNodes, search);
       const newTree = updateNodeInTree(state.tree, newNode, search);
-      console.log(newTree);
 
       const newAddressMap = createAddressMap(newTree, new Map());
       newAddressMap.forEach((value, address) => {
         const prev = state.addressMap.get(address);
         if (prev)
           newAddressMap.set(address, { 
-            ...state.addressMap.get(address),
+            ...prev,
             inputNode: "", 
           });
       });
@@ -547,7 +535,6 @@ function treeReducer(state, action) {
         const prev = state.addressMap.get(action.address.toString());
         newAddressMap.set(action.address.toString(), {
           ...prev,
-          inputNode: "",
           display: true,
         })
       }

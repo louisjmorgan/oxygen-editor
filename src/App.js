@@ -104,23 +104,48 @@ function App() {
   });
 
   const [history, setHistory] = useState([]);
+  const [undos, setUndos] = useState(0)
 
   const dispatch = (action) => {
     if (action.type === "undo") {
-      if (history[0].tree) {
-        const newState = history[0]
-        setHistory((prev) => prev.splice(0,1))
+      if (history[0].tree && history.length > undos + 1) {
+        console.log(undos)
+        const newState = history[undos];
+        setUndos((prev) => prev + 1)
         dispatchTree({
           type: "replace state",
           newState: newState,
-        })
+        });
       }
-    }  else {
-      setHistory((prev) => [state, ...prev])
-      dispatchTree(action)
-    }
+      return;
+    } else {
+      
+      if (
+        action.type !== "focus node" &&
+        action.type !== "unfocus node" &&
+        action.type !== "input name" &&
+        action.type !== "edit name" &&
+        action.type !== "edit node" &&
+        action.type !== "input node" &&
+        // action.type !== "set display children" &&
+        action.type !== "set collapse all" &&
+        action.type !== "copy node" &&
+        action.type !== "copy address" &&
+        action.type !== "change insert target"
+      ) {
+        if (undos > 0) {
+          const newHistory = history.splice(0, undos)
+          console.log(newHistory) 
+          setHistory(() => newHistory)
+          setUndos(() => 0)
+        }
+        setHistory((prev) => [state, ...prev]);
+      }
 
-  }
+      dispatchTree(action);
+    }
+  };
+
   const [isLoaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -136,15 +161,14 @@ function App() {
   useEffect(() => {
     const onKeyDown = (e) => {
       const key = e.key;
-      console.log(e.key);
-      console.log(state.editing)
       if (key === "Enter") e.preventDefault();
-      if (key === "Tab" || key === "Enter" || (
-        (state.editing.name !== true && state.editing.node !== true) &&
-        (key === " " ||
-        key === "ArrowUp" ||
-        key === "ArrowDown")
-      )) {
+      if (
+        key === "Tab" ||
+        key === "Enter" ||
+        (state.editing.name !== true &&
+          state.editing.node !== true &&
+          (key === " " || key === "ArrowUp" || key === "ArrowDown"))
+      ) {
         e.preventDefault();
       }
       // && !pressedKeys.includes(key)
@@ -198,7 +222,7 @@ function App() {
         switch (pressedKeys[0].toString()) {
           case "Enter": {
             const node = getNodeFromTree(state.focus[0], state.tree);
-            const input = state.addressMap.get(state.focus[0].toString())
+            const input = state.addressMap.get(state.focus[0].toString());
             if (!input) {
               dispatch({
                 type: "edit node",
@@ -207,28 +231,27 @@ function App() {
               });
               return;
             }
+            dispatch({
+              type: "edit node",
+              address: node.address,
+              edit: false,
+            });
             if (input.insertTarget === "sibling") {
               dispatch({
                 type: "paste sibling",
                 nodeString: input.inputNode,
                 node: node,
               });
-            }
-            else if (input.insertTarget === "child") {
+            } else if (input.insertTarget === "child") {
               dispatch({
                 type: "paste child",
                 nodeString: input.inputNode,
                 address: node.address,
               });
             }
-            dispatch({
-              type: "edit node",
-              address: node.address,
-              edit: false,
-            });
             return;
-          };
-          
+          }
+
           case "Escape": {
             dispatch({
               type: "edit node",
@@ -238,7 +261,9 @@ function App() {
             return;
           }
           case "Tab": {
-            const prev = state.addressMap.get(state.focus[0].toString()).insertTarget;
+            const prev = state.addressMap.get(
+              state.focus[0].toString()
+            ).insertTarget;
             let newTarget;
             if (prev === "child") newTarget = "sibling";
             if (prev === "sibling") newTarget = "child";
@@ -246,7 +271,7 @@ function App() {
               type: "change insert target",
               address: state.focus[0],
               target: newTarget,
-            })
+            });
             return;
           }
         }
@@ -304,9 +329,9 @@ function App() {
               }
               return;
             }
-            
+
             case "Control,z": {
-              dispatch({type: "undo"})
+              dispatch({ type: "undo" });
             }
           }
         }
@@ -394,7 +419,6 @@ function App() {
               });
             } else {
               const [superParent, parent] = getNextParent(node, state.tree);
-              console.log(parent);
               if (node.children.size > 0) {
                 const displayChildren = state.addressMap.get(
                   node.address.toString()
@@ -556,10 +580,10 @@ function App() {
     setCollapse(!collapsed);
   }
 
-  function undo(){
+  function undo() {
     dispatch({
-      type: "undo"
-    })
+      type: "undo",
+    });
   }
 
   function findFocusIndex(address) {
@@ -579,11 +603,7 @@ function App() {
             { onClick: collapseAll, style: styles.collapseAll },
             "collapse all"
           )}
-          {e(
-            "button",
-            { onClick: undo, style: styles.collapseAll },
-            "undo"
-          )}
+          {e("button", { onClick: undo, style: styles.collapseAll }, "undo")}
           {e(Node, {
             node: state.tree,
             key: "root",
