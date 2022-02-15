@@ -75,7 +75,7 @@ Object.values(commands).forEach((command) => {
 });
 
 function App() {
-  
+
   const [state, dispatchTree] = useReducer(treeReducer, {
     tree: null,
     addressMap: null,
@@ -102,6 +102,7 @@ function App() {
       if (
         action.type !== "focus node" &&
         action.type !== "unfocus node" &&
+        action.type !== "unfocus all" &&
         action.type !== "input name" &&
         action.type !== "edit name" &&
         action.type !== "edit node" &&
