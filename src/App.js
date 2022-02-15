@@ -127,7 +127,7 @@ function App() {
         action.type !== "edit name" &&
         action.type !== "edit node" &&
         action.type !== "input node" &&
-        // action.type !== "set display children" &&
+        action.type !== "set display children" &&
         action.type !== "set collapse all" &&
         action.type !== "copy node" &&
         action.type !== "copy address" &&
@@ -221,8 +221,10 @@ function App() {
       } else if (state.editing.node) {
         switch (pressedKeys[0].toString()) {
           case "Enter": {
+            
             const node = getNodeFromTree(state.focus[0], state.tree);
             const input = state.addressMap.get(state.focus[0].toString());
+            if (state.focus[0].toString() === 'root' && input.insertTarget === "sibling") return;
             if (!input) {
               dispatch({
                 type: "edit node",
@@ -231,11 +233,6 @@ function App() {
               });
               return;
             }
-            dispatch({
-              type: "edit node",
-              address: node.address,
-              edit: false,
-            });
             if (input.insertTarget === "sibling") {
               dispatch({
                 type: "paste sibling",
@@ -603,7 +600,7 @@ function App() {
             { onClick: collapseAll, style: styles.collapseAll },
             "collapse all"
           )}
-          {e("button", { onClick: undo, style: styles.collapseAll }, "undo")}
+          {e("button", { onClick: undo, style: {...styles.collapseAll, marginRight: "7em" }}, "undo")}
           {e(Node, {
             node: state.tree,
             key: "root",

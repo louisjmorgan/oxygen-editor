@@ -109,11 +109,6 @@ const Node = ({
       nodeString: input,
       node: node,
     });
-    dispatch({
-      type: "edit node",
-      address: node.address,
-      edit: false,
-    });
   };
 
   const submitInsertChild = (input) => {
@@ -129,11 +124,6 @@ const Node = ({
       type: "paste child",
       nodeString: input,
       address: node.address,
-    });
-    dispatch({
-      type: "edit node",
-      address: node.address,
-      edit: false,
     });
   };
 
