@@ -289,6 +289,13 @@ function treeReducer(state, action) {
       };
     }
 
+    case "unfocus all": {
+      return {
+        ...state,
+        focus: [],
+      }
+    }
+
     case "set display children": {
       let newAddressMap = new Map(state.addressMap);
       if (action.display === false) {
@@ -320,6 +327,7 @@ function treeReducer(state, action) {
       });
       return {
         ...state,
+        focus: [['root']],
         collapsed: !state.collapsed,
         addressMap: newAddressMap,
       };
@@ -548,7 +556,8 @@ function treeReducer(state, action) {
         if (prev)
           newAddressMap.set(address, { 
             ...prev,
-            inputNode: "", 
+            inputNode: "",
+            insertTarget: "sibling", 
           });
       });
    

@@ -4,6 +4,7 @@
 import "./App.css";
 import React, { useState, useEffect, useRef, useReducer } from "react";
 import Node from "./Components/Node";
+import commands from "./Components/Settings/commands";
 import {
   treeReducer,
   getNodeFromTree,
@@ -67,32 +68,11 @@ const styles = {
   },
 };
 
-const ALLOWED_KEYS = [
-  "ArrowUp",
-  "ArrowDown",
-  "ArrowLeft",
-  "ArrowRight",
-  "Backspace",
-  "Enter",
-  "Escape",
-  "Tab",
-  " ",
-  "c",
-  "C",
-  "v",
-  "V",
-  "a",
-  "A",
-  "e",
-  "E",
-  "i",
-  "E",
-  "z",
-  "Z",
-  "Shift",
-  "Control",
-  "Alt",
-];
+const ALLOWED_KEYS = []
+Object.values(commands).forEach(command => {
+ const array = command.split(",")
+  array.forEach(entry => ALLOWED_KEYS.push(entry))
+})
 
 
 function App() {
@@ -200,7 +180,8 @@ function App() {
     if (pressedKeys[0]) {
       if (state.editing.name) {
         switch (pressedKeys[0].toString()) {
-          case "Enter": {
+          // while editing name
+          case commands.submit: {
             const node = getNodeFromTree(state.focus[0], state.tree);
             dispatch({
               type: "submit name",
@@ -209,7 +190,7 @@ function App() {
             return;
           }
 
-          case "Escape": {
+          case commands.cancel: {
             dispatch({
               type: "edit name",
               address: state.focus[0],
@@ -220,8 +201,8 @@ function App() {
         }
       } else if (state.editing.node) {
         switch (pressedKeys[0].toString()) {
-          case "Enter": {
-            
+          // while inserting nodes
+          case commands.submit: {
             const node = getNodeFromTree(state.focus[0], state.tree);
             const input = state.addressMap.get(state.focus[0].toString());
             if (state.focus[0].toString() === 'root' && input.insertTarget === "sibling") return;
@@ -249,7 +230,7 @@ function App() {
             return;
           }
 
-          case "Escape": {
+          case commands.cancel: {
             dispatch({
               type: "edit node",
               address: state.focus[0],
@@ -257,7 +238,8 @@ function App() {
             });
             return;
           }
-          case "Tab": {
+
+          case commands.indent: {
             const prev = state.addressMap.get(
               state.focus[0].toString()
             ).insertTarget;
@@ -273,69 +255,79 @@ function App() {
           }
         }
       } else {
-        // key combinations
-        if (pressedKeys[1]) {
-          switch (pressedKeys.slice(0, 2).toString()) {
-            case "Alt,ArrowUp": {
-              const node = getNodeFromTree(state.focus[0], state.tree);
-              if (node.index > 0) {
-                dispatch({
-                  type: "shift order",
-                  node: node,
-                  direction: -1,
-                });
-              }
-              return;
-            }
 
-            case "Alt,ArrowDown": {
-              if (state.focus[0].toString() === "root") return;
-              const node = getNodeFromTree(state.focus[0], state.tree);
-              const parent = getNodeFromTree(
-                getParentAddress(state.focus[0]),
-                state.tree
-              );
-              if (node.index < parent.children.size - 1) {
-                dispatch({
-                  type: "shift order",
-                  node: node,
-                  direction: 1,
-                });
-              }
-              return;
-            }
+        let condition;
+        if (pressedKeys[1] && (pressedKeys[1].toString() !== pressedKeys[0].toString()) )
+            condition = pressedKeys.slice(0, 2).toString()
+        else condition = pressedKeys[0]
+      
+        switch (condition) {
+          // global functionality
+          case commands.undo: {
+            dispatch({ type: "undo" });
+            return;
+          }
 
-            case "Alt,ArrowLeft": {
-              const node = getNodeFromTree(state.focus[0], state.tree);
-              const parentAddress = getParentAddress(state.focus[0]);
-              if (parentAddress.toString() === "root") return;
+          case commands.collapseAll: {
+            collapseAll();
+            return;
+          }
+
+          // moving nodes around
+          case commands.shiftUp: {
+            const node = getNodeFromTree(state.focus[0], state.tree);
+            if (node.index > 0) {
               dispatch({
-                type: "shift parent",
+                type: "shift order",
+                node: node,
+                direction: -1,
+              });
+            }
+            return;
+          }
+
+          case commands.shiftDown: {
+            if (state.focus[0].toString() === "root") return;
+            const node = getNodeFromTree(state.focus[0], state.tree);
+            const parent = getNodeFromTree(
+              getParentAddress(state.focus[0]),
+              state.tree
+            );
+            if (node.index < parent.children.size - 1) {
+              dispatch({
+                type: "shift order",
+                node: node,
+                direction: 1,
+              });
+            }
+            return;
+          }
+
+          case commands.shiftLeft: {
+            const node = getNodeFromTree(state.focus[0], state.tree);
+            const parentAddress = getParentAddress(state.focus[0]);
+            if (parentAddress.toString() === "root") return;
+            dispatch({
+              type: "shift parent",
+              node: node,
+            });
+            return;
+          }
+
+          case commands.shiftRight: {
+            const node = getNodeFromTree(state.focus[0], state.tree);
+            if (node.index !== 0) {
+              dispatch({
+                type: "shift sibling",
                 node: node,
               });
-              return;
             }
-
-            case "Alt,ArrowRight": {
-              const node = getNodeFromTree(state.focus[0], state.tree);
-              if (node.index !== 0) {
-                dispatch({
-                  type: "shift sibling",
-                  node: node,
-                });
-              }
-              return;
-            }
-
-            case "Control,z": {
-              dispatch({ type: "undo" });
-            }
+            return;
           }
-        }
 
-        // single keys
-        switch (pressedKeys[0].toString()) {
-          case "ArrowRight": {
+          
+          // ui
+          case commands.focusChild: {
             const node = getNodeFromTree(state.focus[0], state.tree);
 
             if (node.children.size > 0) {
@@ -374,7 +366,7 @@ function App() {
             return;
           }
 
-          case "ArrowLeft": {
+          case commands.focusParent: {
             if (state.focus[0].toString() === "root") return;
             const parentAddress = getParentAddress(state.focus[0]);
             dispatch({
@@ -388,7 +380,7 @@ function App() {
             return;
           }
 
-          case "ArrowDown": {
+          case commands.focusBelow: {
             const node = getNodeFromTree(state.focus[0], state.tree);
             if (state.focus[0].toString() === "root") {
               dispatch({
@@ -452,7 +444,7 @@ function App() {
             return;
           }
 
-          case "ArrowUp": {
+          case commands.focusAbove: {
             if (state.focus[0].toString() === "root") return;
             const node = getNodeFromTree(state.focus[0], state.tree);
             const parent = getNodeFromTree(
@@ -481,7 +473,21 @@ function App() {
             return;
           }
 
-          case "Backspace": {
+          case commands.showHide: {
+            state.focus.forEach((address) => {
+              const node = getNodeFromTree(address, state.tree);
+              const prev = state.addressMap.get(address.toString()).display;
+              dispatch({
+                type: "set display children",
+                node: node,
+                display: !prev,
+              });
+            });
+            return;
+          }
+
+          // deleting, editing and inserting nodes
+          case commands.delete: {
             state.focus.forEach((address) => {
               if (address.toString() === "root") return;
               const node = getNodeFromTree(address, state.tree);
@@ -495,31 +501,7 @@ function App() {
             return;
           }
 
-          case " ": {
-            state.focus.forEach((address) => {
-              const node = getNodeFromTree(address, state.tree);
-              const prev = state.addressMap.get(address.toString()).display;
-              dispatch({
-                type: "set display children",
-                node: node,
-                display: !prev,
-              });
-            });
-            return;
-          }
-
-          case "c": {
-            state.focus.forEach((address) => {
-              const node = getNodeFromTree(address, state.tree);
-              dispatch({
-                type: "copy node",
-                node: node,
-              });
-            });
-            return;
-          }
-
-          case "v": {
+          case commands.paste: {
             state.focus.forEach((address) => {
               const node = getNodeFromTree(address, state.tree);
               navigator.clipboard.readText().then((text) =>
@@ -533,7 +515,37 @@ function App() {
             return;
           }
 
-          case "a": {
+          case commands.editNode: {
+            dispatch({
+              type: "edit name",
+              address: state.focus[0],
+              edit: true,
+            });
+            return;
+          }
+
+          case commands.newNode: {
+            dispatch({
+              type: "edit node",
+              address: state.focus[0],
+              edit: true,
+            });
+            return;
+          }
+
+          //copying
+          case commands.copyNode: {
+            state.focus.forEach((address) => {
+              const node = getNodeFromTree(address, state.tree);
+              dispatch({
+                type: "copy node",
+                node: node,
+              });
+            });
+            return;
+          }
+
+          case commands.copyAddress: {
             state.focus.forEach((address) => {
               dispatch({
                 type: "copy address",
@@ -543,23 +555,7 @@ function App() {
             return;
           }
 
-          case "e": {
-            dispatch({
-              type: "edit name",
-              address: state.focus[0],
-              edit: true,
-            });
-            return;
-          }
-
-          case "Enter": {
-            dispatch({
-              type: "edit node",
-              address: state.focus[0],
-              edit: true,
-            });
-            return;
-          }
+          
         }
       }
     }

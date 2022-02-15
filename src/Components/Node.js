@@ -68,6 +68,16 @@ const Node = ({
     });
   };
 
+  const focusSelf = (e) => {
+    dispatch({
+      type: "unfocus all",
+    });
+    dispatch({
+      type: "focus node",
+      address: node.address,
+    });
+  }
+
   const deleteChild = (child) => {
     dispatch({
       type: "delete child",
@@ -160,6 +170,7 @@ const Node = ({
               ...styles.flex,
               outline: focussed > -1 ? "solid white 1px" : "none",
             },
+            onClick: focusSelf,
             onMouseEnter: displayTools,
             onMouseLeave: hideTools,
           },
