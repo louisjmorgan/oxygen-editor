@@ -39,7 +39,6 @@ const Node = ({
   dispatch,
   addressMap,
   findFocusIndex,
-  parentRef,
   focussed,
   visible,
   displayChildren,

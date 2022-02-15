@@ -68,14 +68,14 @@ const styles = {
   },
 };
 
-const ALLOWED_KEYS = []
-Object.values(commands).forEach(command => {
- const array = command.split(",")
-  array.forEach(entry => ALLOWED_KEYS.push(entry))
-})
-
+const ALLOWED_KEYS = [];
+Object.values(commands).forEach((command) => {
+  const array = command.split(",");
+  array.forEach((entry) => ALLOWED_KEYS.push(entry));
+});
 
 function App() {
+  
   const [state, dispatchTree] = useReducer(treeReducer, {
     tree: null,
     addressMap: null,
@@ -84,14 +84,14 @@ function App() {
   });
 
   const [history, setHistory] = useState([]);
-  const [undos, setUndos] = useState(0)
+  const [undos, setUndos] = useState(0);
 
   const dispatch = (action) => {
     if (action.type === "undo") {
       if (history[0].tree && history.length > undos + 1) {
-        console.log(undos)
+        console.log(undos);
         const newState = history[undos];
-        setUndos((prev) => prev + 1)
+        setUndos((prev) => prev + 1);
         dispatchTree({
           type: "replace state",
           newState: newState,
@@ -99,7 +99,6 @@ function App() {
       }
       return;
     } else {
-      
       if (
         action.type !== "focus node" &&
         action.type !== "unfocus node" &&
@@ -114,10 +113,10 @@ function App() {
         action.type !== "change insert target"
       ) {
         if (undos > 0) {
-          const newHistory = history.splice(0, undos)
-          console.log(newHistory) 
-          setHistory(() => newHistory)
-          setUndos(() => 0)
+          const newHistory = history.splice(0, undos);
+          console.log(newHistory);
+          setHistory(() => newHistory);
+          setUndos(() => 0);
         }
         setHistory((prev) => [state, ...prev]);
       }
@@ -205,7 +204,11 @@ function App() {
           case commands.submit: {
             const node = getNodeFromTree(state.focus[0], state.tree);
             const input = state.addressMap.get(state.focus[0].toString());
-            if (state.focus[0].toString() === 'root' && input.insertTarget === "sibling") return;
+            if (
+              state.focus[0].toString() === "root" &&
+              input.insertTarget === "sibling"
+            )
+              return;
             if (!input) {
               dispatch({
                 type: "edit node",
@@ -255,12 +258,14 @@ function App() {
           }
         }
       } else {
-
         let condition;
-        if (pressedKeys[1] && (pressedKeys[1].toString() !== pressedKeys[0].toString()) )
-            condition = pressedKeys.slice(0, 2).toString()
-        else condition = pressedKeys[0]
-      
+        if (
+          pressedKeys[1] &&
+          pressedKeys[1].toString() !== pressedKeys[0].toString()
+        )
+          condition = pressedKeys.slice(0, 2).toString();
+        else condition = pressedKeys[0];
+
         switch (condition) {
           // global functionality
           case commands.undo: {
@@ -325,7 +330,6 @@ function App() {
             return;
           }
 
-          
           // ui
           case commands.focusChild: {
             const node = getNodeFromTree(state.focus[0], state.tree);
@@ -554,8 +558,6 @@ function App() {
             });
             return;
           }
-
-          
         }
       }
     }
@@ -596,7 +598,14 @@ function App() {
             { onClick: collapseAll, style: styles.collapseAll },
             "collapse all"
           )}
-          {e("button", { onClick: undo, style: {...styles.collapseAll, marginRight: "7em" }}, "undo")}
+          {e(
+            "button",
+            {
+              onClick: undo,
+              style: { ...styles.collapseAll, marginRight: "7em" },
+            },
+            "undo"
+          )}
           {e(Node, {
             node: state.tree,
             key: "root",

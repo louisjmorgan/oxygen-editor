@@ -333,9 +333,20 @@ function treeReducer(state, action) {
         if (prev)
           newAddressMap.set(address, { ...state.addressMap.get(address) });
       });
+
+      const newParent = getNodeFromTree(action.node.address, newTree)
+      let newFocus
+      if (newParent.children.size === 0) {
+        newFocus = [action.node.address];
+      } else {
+        const siblings = [...newParent.children]
+        if (action.child.index === 0 ) newFocus = [siblings[0][1].address]
+        else newFocus = [siblings[action.child.index - 1][1].address]
+        }
+    
       return {
         ...state,
-        focus: [action.node.address],
+        focus: newFocus,
         addressMap: newAddressMap,
         tree: newTree,
       };
