@@ -141,6 +141,7 @@ function App() {
   useEffect(() => {
     const onKeyDown = (e) => {
       const key = e.key;
+      console.log(key)
       if (key === "Enter") e.preventDefault();
       if (
         key === "Tab" ||
@@ -347,8 +348,7 @@ function App() {
                 });
               }
               dispatch({
-                type: "unfocus node",
-                address: state.focus[0],
+                type: "unfocus all",
               });
               dispatch({
                 type: "focus node",
@@ -375,8 +375,7 @@ function App() {
             if (state.focus[0].toString() === "root") return;
             const parentAddress = getParentAddress(state.focus[0]);
             dispatch({
-              type: "unfocus node",
-              address: state.focus[0],
+              type: "unfocus all",
             });
             dispatch({
               type: "focus node",
@@ -389,8 +388,7 @@ function App() {
             const node = getNodeFromTree(state.focus[0], state.tree);
             if (state.focus[0].toString() === "root") {
               dispatch({
-                type: "unfocus node",
-                address: state.focus[0],
+                type: "unfocus all",
               });
               dispatch({
                 type: "focus node",
@@ -404,8 +402,7 @@ function App() {
             );
             if (node.index < parent.children.size - 1) {
               dispatch({
-                type: "unfocus node",
-                address: state.focus[0],
+                type: "unfocus all",
               });
               dispatch({
                 type: "focus node",
@@ -425,8 +422,7 @@ function App() {
                   });
                 }
                 dispatch({
-                  type: "unfocus node",
-                  address: state.focus[0],
+                  type: "unfocus all",
                 });
                 dispatch({
                   type: "focus node",
@@ -435,8 +431,7 @@ function App() {
               } else {
                 if (parent.index < superParent.children.size - 1) {
                   dispatch({
-                    type: "unfocus node",
-                    address: state.focus[0],
+                    type: "unfocus all",
                   });
                   dispatch({
                     type: "focus node",
@@ -458,8 +453,7 @@ function App() {
             );
             if (node.index > 0) {
               dispatch({
-                type: "unfocus node",
-                address: state.focus[0],
+                type: "unfocus all",
               });
               dispatch({
                 type: "focus node",
@@ -467,8 +461,7 @@ function App() {
               });
             } else {
               dispatch({
-                type: "unfocus node",
-                address: state.focus[0],
+                type: "unfocus all",
               });
               dispatch({
                 type: "focus node",
@@ -477,9 +470,43 @@ function App() {
             }
             return;
           }
+          
+
+          case commands.addFocusAbove: {
+            if (state.focus[0].toString() === "root") return;
+            const node = getNodeFromTree(state.focus[0], state.tree);
+            const parent = getNodeFromTree(
+              getParentAddress(state.focus[0]),
+              state.tree
+            );
+
+            if (node.index > 0) {
+              dispatch({
+                type: "focus node",
+                address: [...parent.children][node.index - 1][1].address,
+              });
+            }
+            return;
+          }
+
+          case commands.addFocusBelow: {
+            if (state.focus[0].toString() === "root") return;
+            const node = getNodeFromTree(state.focus[0], state.tree);
+            const parent = getNodeFromTree(
+              getParentAddress(state.focus[0]),
+              state.tree
+            );
+            if (node.index < parent.children.size - 1) {
+              dispatch({
+                type: "focus node",
+                address: [...parent.children][node.index + 1][1].address,
+              });
+            }
+            return;
+          }
 
           case commands.showHide: {
-            state.focus.forEach((address) => {
+            state.focus.forEach((address) => {    
               const node = getNodeFromTree(address, state.tree);
               const prev = state.addressMap.get(address.toString()).display;
               dispatch({
@@ -493,14 +520,15 @@ function App() {
 
           // deleting, editing and inserting nodes
           case commands.delete: {
-            state.focus.forEach((address) => {
+            const toDelete = [...state.focus]
+            toDelete.forEach((address) => {
               if (address.toString() === "root") return;
               const node = getNodeFromTree(address, state.tree);
-              const parentAddress = getParentAddress(address);
+              const parent = getNodeFromTree(getParentAddress(address),state.tree);
               dispatch({
                 type: "delete child",
                 child: node,
-                node: getNodeFromTree(parentAddress, state.tree),
+                node: parent,
               });
             });
             return;
@@ -540,6 +568,7 @@ function App() {
 
           //copying
           case commands.copyNode: {
+            console.log(state.focus)
             state.focus.forEach((address) => {
               const node = getNodeFromTree(address, state.tree);
               dispatch({

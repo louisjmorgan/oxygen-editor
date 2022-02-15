@@ -15,6 +15,8 @@ const commands = {
     focusChild: "ArrowRight",
     focusAbove: "ArrowUp",
     focusBelow: "ArrowDown",
+    addFocusAbove: "Shift,ArrowUp",
+    addFocusBelow: "Shift,ArrowDown",
 
     // deleting, editing and inserting nodes
     delete: "Backspace",

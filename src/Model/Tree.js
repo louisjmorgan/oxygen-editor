@@ -18,6 +18,7 @@ function parseNodes(code, rootName = "root") {
       nodes.children.set(token.value, node);
     }
   });
+  console.log(nodes)
   return nodes;
 }
 
@@ -211,6 +212,7 @@ function initializeState(code) {
       node: false,
     },
     collapsed: false,
+    clipboard: "",
   };
   return state;
 }
@@ -228,6 +230,7 @@ function deleteChild(parent, child, tree) {
     entry[1].index = index;
     newNode.children.set(entry[0], entry[1]);
   });
+
   return updateNodeInTree(tree, newNode, parent.address);
 }
 
@@ -326,7 +329,8 @@ function treeReducer(state, action) {
     }
 
     case "delete child": {
-      const newTree = deleteChild(action.node, action.child, state.tree);
+      const parent = getNodeFromTree(action.node.address, state.tree)
+      const newTree = deleteChild(parent, action.child, state.tree);
       const newAddressMap = createAddressMap(newTree, new Map());
       newAddressMap.forEach((value, address) => {
         const prev = state.addressMap.get(address);
@@ -335,14 +339,18 @@ function treeReducer(state, action) {
       });
 
       const newParent = getNodeFromTree(action.node.address, newTree)
-      let newFocus
+        
+      let newFocus = [...state.focus]
+      
+ 
       if (newParent.children.size === 0) {
         newFocus = [action.node.address];
       } else {
         const siblings = [...newParent.children]
         if (action.child.index === 0 ) newFocus = [siblings[0][1].address]
         else newFocus = [siblings[action.child.index - 1][1].address]
-        }
+      }
+
     
       return {
         ...state,
@@ -467,8 +475,15 @@ function treeReducer(state, action) {
     }
 
     case "copy node": {
-      navigator.clipboard.writeText(nodeToString(action.node));
-      return state;
+      let newClipBoard = "";
+      state.focus.forEach((address) => {
+        newClipBoard += nodeToString(getNodeFromTree(address, state.tree)) + "\n"
+      });
+      navigator.clipboard.writeText(newClipBoard);
+      return {
+        ...state,
+        clipBoard: newClipBoard,
+      };
     }
 
     case "copy address": {
@@ -538,14 +553,14 @@ function treeReducer(state, action) {
 
     case "paste child": {
       if (!action.nodeString) return state;
-      const parsedNodes = parseNodes(`${action.nodeString}`)
-        .children.values()
-        .next().value;
-
-      const search = [...action.address];
-      search.push(parsedNodes.name);
-      const newNode = updateAddresses(parsedNodes, search);
-      const newTree = updateNodeInTree(state.tree, newNode, search);
+      const parsedNodes = parseNodes(`${action.nodeString}`).children
+      let newTree = state.tree
+      parsedNodes.forEach((sibling) => {
+        const search = [...action.address];
+        search.push(sibling.name);
+        const newNode = updateAddresses(sibling, search);
+        newTree = updateNodeInTree(newTree, newNode, search);
+      })
 
       const prev = state.addressMap.get(action.address.toString());
       state.addressMap.set(action.address.toString(), {
@@ -574,7 +589,7 @@ function treeReducer(state, action) {
 
       return {
         ...state,
-        focus: [search],
+        focus: [action.address],
         editing: {
           ...state.editing,
           node: false,
