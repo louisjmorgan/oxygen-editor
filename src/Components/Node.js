@@ -68,6 +68,7 @@ const Node = ({
   };
 
   const focusSelf = (e) => {
+    if (e.target.id === "delete") return;
     dispatch({
       type: "unfocus all",
     });

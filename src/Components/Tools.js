@@ -87,6 +87,7 @@ function Tools({
             style: {
               ...styles.toolButton,
             },
+            id: "delete",
           },
           "⌫"
         ),
