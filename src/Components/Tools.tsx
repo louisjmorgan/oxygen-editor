@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 
 const e = React.createElement;
 
@@ -26,6 +26,16 @@ const styles = {
   },
 };
 
+type ToolsProps = {
+  showTools: boolean,
+  editName: () => void,
+  copyNode: () => void,
+  pasteNode: () => void,
+  copyAddress: () => void,
+  deleteSelf: () => void,
+  editNode: () => void,
+}
+
 function Tools({
   showTools,
   editName,
@@ -34,16 +44,17 @@ function Tools({
   copyAddress,
   deleteSelf,
   editNode,
-}) {
+}: ToolsProps) {
 
-  return showTools
+  return <>
+  {showTools
     ? e(
         "div",
         { style: styles.tools },
         e(
           "button",
           {
-            onClick: e => editName(),
+            onClick: () => editName(),
             style: {
               ...styles.toolButton,
             },
@@ -102,7 +113,8 @@ function Tools({
           "➕"
         )
       )
-    : "";
+    : ""}
+    </>
 }
 
 export default Tools;

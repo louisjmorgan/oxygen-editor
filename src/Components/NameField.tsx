@@ -1,9 +1,10 @@
-import React, { useState, useRef, useEffect } from "react";
+import * as React from "react";
+import { ACTIONTYPE, Node as NodeType} from "../Model/Types";
 import Tools from "./Tools";
-
+const { useState, useEffect } = React
 const e = React.createElement;
 
-const styles = {
+const styles: { [key: string]: React.CSSProperties } = {
   nameField: {
     position: "relative",
     display: "flex",
@@ -30,6 +31,16 @@ const styles = {
   },
 };
 
+type NameFieldProps = {
+  node: NodeType,
+  dispatch: (action: ACTIONTYPE) => void,
+  showTools: boolean,
+  edit: boolean,
+  submitEdit: () => void,
+  submitInsertChild: (input: string) => void,
+  deleteSelf: () => void,
+}
+
 const NameField = ({
   node,
   dispatch,
@@ -38,7 +49,7 @@ const NameField = ({
   submitEdit,
   submitInsertChild,
   deleteSelf,
-}) => {
+}: NameFieldProps) => {
   const [input, setInput] = useState(node.name);
 
   useEffect(() => {
@@ -46,33 +57,50 @@ const NameField = ({
   }, [edit, node.name]);
   
 
-  const handleInput = (e) => {
-    setInput(() => e.target.value);
+  const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setInput(() => event.target.value);
     dispatch({
       type: "input name",
       address: node.address,
-      input: e.target.value,
+      input: event.target.value,
     })
   };
 
 
-  const submit = (e) => {
-    e.preventDefault();
+  const submit = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
     submitEdit();
   };
 
-  const copyNode = (e) => {
+  const copyNode = () => {
+    dispatch({
+      type: "unfocus all",
+    });
+    dispatch({
+      type: "focus node",
+      address: node.address,
+    });
     dispatch({
       type: "copy node",
-      node: node,
     });
   };
 
-  const pasteNode = (e) => {
-    navigator.clipboard.readText().then((text) => submitInsertChild(text));
+  const pasteNode = () => {
+    try {
+      navigator.clipboard.readText().then((text) => submitInsertChild(text));
+    } catch (err) {
+      console.error("Unable to paste", err)
+    }
   };
 
-  const copyAddress = (e) => {
+  const copyAddress = () => {
+    dispatch({
+      type: "unfocus all",
+    });
+    dispatch({
+      type: "focus node",
+      address: node.address,
+    });
     dispatch({
 			type: "copy address",
       address: node.address,
@@ -123,20 +151,15 @@ const NameField = ({
 
     edit
       ? ""
-      : e(
-          Tools,
-          {
-            showTools: showTools,
-            dispatch: dispatch,
-            editName: editName,
-            copyNode: copyNode,
-            pasteNode: pasteNode,
-            copyAddress: copyAddress,
-            deleteSelf: deleteSelf,
-            editNode: editNode,
-          },
-          null
-        )
+      : (<Tools 
+          showTools={showTools}
+          editName={editName}
+          copyNode={copyNode}
+          pasteNode={pasteNode}
+          copyAddress={copyAddress}
+          deleteSelf={deleteSelf}
+          editNode={editNode}
+        />)
   );
 };
 
