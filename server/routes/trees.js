@@ -7,8 +7,11 @@ const tree_controller = require('../controllers/treeController');
 // router.get('/', post_controller.posts_get);
 
 // create new post
+router.get('/', tree_controller.tree_get)
 router.post('/', tree_controller.tree_save_post);
-router.post('/update', tree_controller.tree_update_post)
+router.put('/', tree_controller.tree_update_put)
+router.delete('/', tree_controller.tree_delete)
+
 
 // //view comments
 // router.get('/:postid/comments', post_controller.comments_get);

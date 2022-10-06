@@ -91,12 +91,12 @@ exports.user_login_post = [
             } else {
               res
                 .status(401)
-                .json({ success: false, msg: "Incorrect password" });
+                .json({ success: false, errors: [{msg: "Incorrect password", param: 'password' }]});
             }
           });
         })
         .catch((err) =>
-          res.status(401).json({ success: false, msg: "User does not exist" })
+          res.status(401).json({ success: false, errors: [{msg: "Incorrect username", param: 'username' }] })
         );
     }
   },

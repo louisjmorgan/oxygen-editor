@@ -17,18 +17,23 @@ require('./config/passport')(passport);
 app.use(passport.initialize());
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+// app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Allows react application to make HTTP requests to Express application
 app.use(cors());
 
+app.use(express.static(path.join(__dirname, '../client/build')));
+
 app.use(require('./routes'));
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
 });
+
+
 
 // error handler
 app.use(function(err, req, res, next) {
