@@ -198,8 +198,8 @@ if (pressedKeys[0]) {
       }
 
       case commands.focusParent: {
-        if (state.focus[0].toString() === "root") return;
         const parentAddress = getParentAddress(state.focus[0]);
+        if (parentAddress.toString() === 'root') return;
         dispatch({
           type: "unfocus all",
         });
@@ -273,8 +273,10 @@ if (pressedKeys[0]) {
       case commands.focusAbove: {
         if (state.focus[0].toString() === "root") return;
         const node = getNodeFromTree(state.focus[0], state.tree);
+        const parentAddress = getParentAddress(state.focus[0])
+        if (parentAddress.toString() === "root") return;
         const parent = getNodeFromTree(
-          getParentAddress(state.focus[0]),
+          parentAddress,
           state.tree
         );
         if (node.index > 0) {
@@ -301,8 +303,10 @@ if (pressedKeys[0]) {
       case commands.addFocusAbove: {
         if (state.focus[0].toString() === "root") return;
         const node = getNodeFromTree(state.focus[0], state.tree);
+        const parentAddress = getParentAddress(state.focus[0])
+        if (parentAddress.toString() === "root") return;
         const parent = getNodeFromTree(
-          getParentAddress(state.focus[0]),
+          parentAddress,
           state.tree
         );
 

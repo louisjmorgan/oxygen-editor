@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Modal, Box, Typography, TableBody, TableRow, TableCell }from '@mui/material';
-import commands from '../Utils/commands';
+import commands from '../../Utils/commands';
 
 const style = {
   position: 'absolute' as 'absolute',
@@ -130,7 +130,7 @@ function ShortcutsModal({open, handleClose}: ShortcutsProps) {
       </Typography>
       <TableBody>
         {commandsDict.global.map((command) => (
-          <TableRow>
+          <TableRow key={command.key}>
             <TableCell>{command.description}</TableCell>
             <TableCell>{commands[command.key]}</TableCell>
           </TableRow>
@@ -141,7 +141,7 @@ function ShortcutsModal({open, handleClose}: ShortcutsProps) {
       </Typography>
       <TableBody>
         {commandsDict.moving.map((command) => (
-          <TableRow>
+          <TableRow key={command.key}>
             <TableCell>{command.description}</TableCell>
             <TableCell>{commands[command.key]}</TableCell>
           </TableRow>
@@ -152,7 +152,7 @@ function ShortcutsModal({open, handleClose}: ShortcutsProps) {
       </Typography>
       <TableBody>
         {commandsDict.ui.map((command) => (
-          <TableRow>
+          <TableRow key={command.key}>
             <TableCell>{command.description}</TableCell>
             <TableCell>{commands[command.key]}</TableCell>
           </TableRow>
@@ -163,7 +163,7 @@ function ShortcutsModal({open, handleClose}: ShortcutsProps) {
       </Typography>
       <TableBody>
         {commandsDict.editing.map((command) => (
-          <TableRow>
+          <TableRow key={command.key}>
             <TableCell>{command.description}</TableCell>
             <TableCell>{commands[command.key]}</TableCell>
           </TableRow>

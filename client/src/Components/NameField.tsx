@@ -1,7 +1,8 @@
+import { Button, Input } from "@mui/material";
 import * as React from "react";
-import { ACTIONTYPE, Node as NodeType} from "../Model/Types";
+import { ACTIONTYPE, Node as NodeType } from "../Model/Types";
 import Tools from "./Tools";
-const { useState, useEffect } = React
+const { useState, useEffect } = React;
 const e = React.createElement;
 
 const styles: { [key: string]: React.CSSProperties } = {
@@ -9,7 +10,13 @@ const styles: { [key: string]: React.CSSProperties } = {
     position: "relative",
     display: "flex",
   },
-
+  input: {
+    background: "rgba(0, 0, 0, 0)",
+    border: "none",
+    outline: "none",
+    color: "white",
+    fontFamily: `"DejaVu Mono", monospace`,
+  },
   token: {
     display: "inline",
   },
@@ -24,7 +31,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: "white",
     fontWeight: "bold",
     fontSize: "1em",
-    backgroundColor: "#282c34",
+    background: "transparent",
     border: "none",
     borderRadius: "2px",
     fontFamily: "Segoe UI Symbol",
@@ -32,19 +39,21 @@ const styles: { [key: string]: React.CSSProperties } = {
 };
 
 type NameFieldProps = {
-  node: NodeType,
-  dispatch: (action: ACTIONTYPE) => void,
-  showTools: boolean,
-  edit: boolean,
-  submitEdit: () => void,
-  submitInsertChild: (input: string) => void,
-  deleteSelf: () => void,
-}
+  node: NodeType;
+  dispatch: (action: ACTIONTYPE) => void;
+  showTools: boolean;
+  isRoot: boolean;
+  edit: boolean;
+  submitEdit: () => void;
+  submitInsertChild: (input: string) => void;
+  deleteSelf: () => void;
+};
 
 const NameField = ({
   node,
   dispatch,
   showTools,
+  isRoot,
   edit,
   submitEdit,
   submitInsertChild,
@@ -53,9 +62,8 @@ const NameField = ({
   const [input, setInput] = useState(node.name);
 
   useEffect(() => {
-    setInput(() => node.name)
+    setInput(() => node.name);
   }, [edit, node.name]);
-  
 
   const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     setInput(() => event.target.value);
@@ -63,9 +71,8 @@ const NameField = ({
       type: "input name",
       address: node.address,
       input: event.target.value,
-    })
+    });
   };
-
 
   const submit = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -89,7 +96,7 @@ const NameField = ({
     try {
       navigator.clipboard.readText().then((text) => submitInsertChild(text));
     } catch (err) {
-      console.error("Unable to paste", err)
+      console.error("Unable to paste", err);
     }
   };
 
@@ -102,17 +109,17 @@ const NameField = ({
       address: node.address,
     });
     dispatch({
-			type: "copy address",
+      type: "copy address",
       address: node.address,
     });
   };
 
-  function editNode(){
+  function editNode() {
     dispatch({
-        type: "edit node",
-        address: node.address,
-        edit: true,
-    })
+      type: "edit node",
+      address: node.address,
+      edit: true,
+    });
   }
 
   function editName() {
@@ -120,46 +127,48 @@ const NameField = ({
       type: "edit name",
       address: node.address,
       edit: true,
-    })
+    });
   }
 
   return e(
     "div",
     { style: styles.nameField },
-    edit
-      ? e(
-          "div",
-          null,
-          e("input", {
-            autoFocus: true,
-            style: styles.input,
-            value: input,
-            onChange: handleInput,
-          }),
-          e(
-            "button",
-            {
-              onClick: submit,
-              style: {
-                ...styles.saveButton,
-              },
-            },
-            "💾"
-          )
-        )
-      : e("p", { style: styles.token }, `${node.name}`),
+    edit ? (
+      <div>
+        <Input
+          autoFocus
+          style={{ ...styles.input }}
+          value={input}
+          onChange={handleInput}
+          disableUnderline
+        />
+        <Button
+          onClick={submit}
+          style={{
+            ...styles.saveButton,
+          }}
+        >
+          💾
+        </Button>
+      </div>
+    ) : (
+      e("p", { style: styles.token }, `${node.name}`)
+    ),
 
-    edit
-      ? ""
-      : (<Tools 
-          showTools={showTools}
-          editName={editName}
-          copyNode={copyNode}
-          pasteNode={pasteNode}
-          copyAddress={copyAddress}
-          deleteSelf={deleteSelf}
-          editNode={editNode}
-        />)
+    edit ? (
+      ""
+    ) : (
+      <Tools
+        showTools={showTools}
+        isRoot={isRoot}
+        editName={editName}
+        copyNode={copyNode}
+        pasteNode={pasteNode}
+        copyAddress={copyAddress}
+        deleteSelf={deleteSelf}
+        editNode={editNode}
+      />
+    )
   );
 };
 

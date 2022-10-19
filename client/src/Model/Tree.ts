@@ -1,7 +1,14 @@
 /* eslint-disable default-case */
 // functions to parse nodes to/from strings
 
-import {Node, Token, AddressMapItem, AddressMap, State, ACTIONTYPE} from './Types'
+import {
+  Node,
+  Token,
+  AddressMapItem,
+  AddressMap,
+  State,
+  ACTIONTYPE,
+} from "./Types";
 
 function createNode(name: string, address: string[] = [], index = 0): Node {
   const children: Map<string, Node> = new Map();
@@ -24,14 +31,19 @@ function parseTokens(code: string) {
     const token: Token = {
       y: index,
       x: countRepeatedCharacter(line, "\t"),
-      value: line.replace(/[\t\r\n]+/g, ''),
+      value: line.replace(/[\t\r\n]+/g, ""),
     };
     if (token.value !== "") tokens.push(token);
   });
   return tokens;
 }
 
-function parseRecursive(superToken: Token, tokens: Token[], address: string[], index: number) {
+function parseRecursive(
+  superToken: Token,
+  tokens: Token[],
+  address: string[],
+  index: number
+) {
   const node = createNode(superToken.value);
   node.address = [...address, superToken.value];
   let orderIndex = 0;
@@ -50,17 +62,21 @@ function parseRecursive(superToken: Token, tokens: Token[], address: string[], i
 }
 
 function parseNodes(code: string, rootName: string = "root") {
-  const nodes = createNode(rootName);
-  nodes.address.push(rootName);
+  const nodes = new Map()
   const tokens = parseTokens(code);
   tokens.forEach((token, index) => {
     if (token.x === 0) {
-      const node = parseRecursive(token, tokens, nodes.address, index + 1);
-      node.address = [...nodes.address, token.value];
-
-      nodes.children.set(token.value, node);
+      const node = parseRecursive(token, tokens, ['root'], index + 1);
+      node.address = ['root', token.value];
+      nodes.set(token.value, node);
     }
   });
+  return nodes;
+}
+
+function parseRoot(code: string, rootName: string = 'root') {
+  const nodes = createNode(rootName, ['root']);
+  nodes.children = parseNodes(code)
   return nodes;
 }
 
@@ -68,9 +84,13 @@ function nodeToString(node: Node, depth = 0, output = "") {
   const tab = "\t";
   const indent = tab.repeat(depth);
   if (depth !== 0) output += "\n";
-  output += indent + node.name;
+  let newDepth = depth
+  if (node.address.toString() !== 'root') {
+    newDepth = depth + 1
+    output += indent + node.name;
+  }
   node.children.forEach((child) => {
-    output = nodeToString(child, depth + 1, output);
+    output = nodeToString(child, newDepth, output);
   });
   return output;
 }
@@ -100,11 +120,17 @@ function updateAddresses(node: Node, address: string[]) {
   return newNode;
 }
 
-function updateNodeInTree(node: Node, newNode: Node, address: string[], insertionIndex = 0) {
+function updateNodeInTree(
+  node: Node,
+  newNode: Node,
+  address: string[],
+  insertionIndex = 0,
+  rootName: string = 'root'
+) {
   const search = [...address];
   if (search.length === 1) return newNode;
 
-  const newTree = createNode(address[0], [...node.address], node.index);
+  const newTree = createNode(node.name, [...node.address], node.index);
 
   if (search.length === 2) {
     let shouldUpdate = [...node.children].reduce((prev, child) => {
@@ -173,8 +199,7 @@ function getParentAddress(address: string[]) {
   if (length > 1) {
     const newAddress = address.filter((elem, i) => i !== length - 1);
     return newAddress;
-  }
-  else return address;
+  } else return address;
 }
 
 function getNextParent(node: Node, tree: Node): [parent: Node, node: Node] {
@@ -183,8 +208,6 @@ function getNextParent(node: Node, tree: Node): [parent: Node, node: Node] {
   if (node.index < parent.children.size - 1) return [parent, node];
   else return getNextParent(parent, tree);
 }
-
-
 
 function createAddressMap(node: Node, map: AddressMap) {
   const initial: AddressMapItem = {
@@ -203,20 +226,36 @@ function createAddressMap(node: Node, map: AddressMap) {
   return map;
 }
 
-
 function initializeState(code: string): State {
-  const tree = parseNodes(code);
+  const tree = parseRoot(code);
   const addressMap = createAddressMap(tree, new Map());
+  const [[firstChild]] = [...tree.children]
   const state = {
     tree: tree,
     addressMap: addressMap,
-    focus: [["root"]],
+    focus: [["root", firstChild]],
     editing: {
       name: false,
       node: false,
+      modal: false,
     },
     collapsed: false,
     clipboard: "",
+    user: '',
+    fetched: {
+      current: -1,
+      trees: []
+    },
+    errorDialog: {
+      isOpen: false,
+      content: {
+        title: '',
+        text: '',
+        buttonTrue: '',
+        buttonFalse: null,
+      },
+      action: (shouldAct: boolean) => null,
+    }
   };
   return state;
 }
@@ -254,8 +293,6 @@ function collapseChildren(node: Node, addressMap: AddressMap) {
   return addressMap;
 }
 
-
-
 function treeReducer(state: State, action: ACTIONTYPE): State {
   switch (action.type) {
     case "initialize": {
@@ -263,17 +300,60 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
       return newState;
     }
 
+    case "load tree": {
+      const tree = parseRoot(action.tree.content, action.tree.title);
+      const addressMap = createAddressMap(tree, new Map())
+      const [[firstChild]] = [...tree.children]
+      return {
+        ...state,
+        tree,
+        focus: [['root', firstChild]],
+        addressMap,
+        fetched: {
+          ...state.fetched,
+          current: action.index
+        }
+      }
+    }
+
+    case "set fetched trees": {
+      return {
+        ...state,
+        fetched: {
+          ...state.fetched,
+         trees: action.trees
+        },
+      }
+    }
+
+    case "set user": {
+      return {
+        ...state,
+        user: action.user,
+      }
+    }
+
     case "replace state": {
       return {
         ...action.newState,
         editing: {
+          modal: false,
           name: false,
           node: false,
-        }
+        },
       };
     }
 
+    case "set error dialog": {
+      return {
+        ...state,
+        errorDialog: action.dialog,
+      }
+    }
+
+
     case "focus node": {
+      if (action.address.toString() === 'root') return state
       const newFocus = [...state.focus];
       newFocus.unshift(action.address);
       return {
@@ -296,7 +376,7 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
       return {
         ...state,
         focus: [],
-      }
+      };
     }
 
     case "set display children": {
@@ -305,15 +385,16 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
         newAddressMap = collapseChildren(action.node, newAddressMap);
       } else {
         const prev = state.addressMap.get(action.node.address.toString());
-        if (prev) { 
+        if (prev) {
           newAddressMap.set(action.node.address.toString(), {
-          ...prev,
-          display: action.display,
-        })
-      }}
+            ...prev,
+            display: action.display,
+          });
+        }
+      }
 
       let collapsed = false;
-      if (action.node.address.toString()  === "root") collapsed = true;
+      if (action.node.address.toString() === "root") collapsed = true;
       return {
         ...state,
         collapsed: collapsed,
@@ -334,36 +415,33 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
       });
       return {
         ...state,
-        focus: [['root']],
+        focus: [["root"]],
         collapsed: !state.collapsed,
         addressMap: newAddressMap,
       };
     }
 
     case "delete child": {
-      const parent = getNodeFromTree(action.node.address, state.tree)
+      const parent = getNodeFromTree(action.node.address, state.tree);
       const newTree = deleteChild(parent, action.child, state.tree);
       const newAddressMap = createAddressMap(newTree, new Map());
       newAddressMap.forEach((value, address) => {
         const prev = state.addressMap.get(address);
-        if (prev)
-          newAddressMap.set(address, { ...prev });
+        if (prev) newAddressMap.set(address, { ...prev });
       });
 
-      const newParent = getNodeFromTree(action.node.address, newTree)
-        
-      let newFocus = [...state.focus]
-      
- 
+      const newParent = getNodeFromTree(action.node.address, newTree);
+
+      let newFocus = [...state.focus];
+
       if (newParent.children.size === 0) {
         newFocus = [action.node.address];
       } else {
-        const siblings = [...newParent.children]
-        if (action.child.index === 0 ) newFocus = [siblings[0][1].address]
-        else newFocus = [siblings[action.child.index - 1][1].address]
+        const siblings = [...newParent.children];
+        if (action.child.index === 0) newFocus = [siblings[0][1].address];
+        else newFocus = [siblings[action.child.index - 1][1].address];
       }
 
-    
       return {
         ...state,
         focus: newFocus,
@@ -378,10 +456,10 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
       const prev = state.addressMap.get(action.address.toString());
       if (prev) {
         newAddressMap.set(action.address.toString(), {
-        ...prev,
-        editName: action.edit,
-      });}
-      
+          ...prev,
+          editName: action.edit,
+        });
+      }
 
       return {
         ...state,
@@ -393,12 +471,21 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
       };
     }
 
+    case "set modal": {
+      return {
+        ...state,
+        editing: {
+          ...state.editing,
+          modal: action.isOpen,
+        },
+      };
+    }
+
     case "input name": {
       const newInput = action.input;
       const newAddressMap = new Map(state.addressMap);
       const prev = state.addressMap.get(action.address.toString());
       if (prev) {
-        console.log(newInput)
         newAddressMap.set(action.address.toString(), {
           ...prev,
           inputName: newInput,
@@ -410,10 +497,22 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
       };
     }
 
+    case "edit root name": {
+      const newRoot = createNode(action.name, ['root'])
+      state.tree.children.forEach((child) =>
+        newRoot.children.set(child.name, child)
+      );
+      const newAddressMap = createAddressMap(newRoot, new Map());
+      return {
+        ...state,
+        addressMap: newAddressMap,
+        tree: newRoot,
+      }
+    }
+
     case "submit name": {
-      const newName = state.addressMap.get(
-        action.node.address.toString()
-      )?.inputName as string;
+      const newName = state.addressMap.get(action.node.address.toString())
+        ?.inputName as string;
       const parentAddress = getParentAddress(action.node.address);
       const newAddress = [...parentAddress];
       newAddress.push(newName);
@@ -435,15 +534,14 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
           ...prev,
           editName: false,
         });
-      };
+      }
 
       const newAddressMap = createAddressMap(newTree, new Map());
       newAddressMap.forEach((value, address) => {
         const prev = state.addressMap.get(address);
-        if (prev)
-          newAddressMap.set(address, { ...prev });
+        if (prev) newAddressMap.set(address, { ...prev });
       });
-    
+
       return {
         ...state,
         focus: [newAddress],
@@ -496,13 +594,14 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
     case "copy node": {
       let newClipBoard = "";
       state.focus.forEach((address) => {
-        newClipBoard += nodeToString(getNodeFromTree(address, state.tree)) + "\n"
+        newClipBoard +=
+          nodeToString(getNodeFromTree(address, state.tree)) + "\n";
       });
-      console.log(newClipBoard)
+      console.log(newClipBoard);
       try {
         navigator.clipboard.writeText(newClipBoard);
       } catch (err) {
-        console.error('Unable to copy',err)
+        console.error("Unable to copy", err);
       }
       return {
         ...state,
@@ -514,7 +613,7 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
       try {
         navigator.clipboard.writeText(action.address.toString());
       } catch (err) {
-          console.error('Unable to copy',err)
+        console.error("Unable to copy", err);
       }
       return state;
     }
@@ -538,7 +637,7 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
 
     case "paste sibling": {
       if (!action.nodeString) return state;
-      const parsedNodes = parseNodes(`${action.nodeString}`)
+      const parsedNodes = parseRoot(`${action.nodeString}`)
         .children.values()
         .next().value;
       const search = [...action.node.address];
@@ -560,14 +659,14 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
           editNode: false,
         });
       }
-     
+
       const newAddressMap = createAddressMap(newTree, new Map());
       newAddressMap.forEach((value, address) => {
         const prev = state.addressMap.get(address);
         if (prev)
-          newAddressMap.set(address, { 
+          newAddressMap.set(address, {
             ...prev,
-            inputNode: "", 
+            inputNode: "",
             editNode: false,
           });
       });
@@ -586,14 +685,15 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
 
     case "paste child": {
       if (!action.nodeString) return state;
-      const parsedNodes = parseNodes(`${action.nodeString}`).children
-      let newTree = state.tree
+      const parsedNodes = parseRoot(`${action.nodeString}`).children;
+      let newTree = state.tree;
+      let search: string[] = []
       parsedNodes.forEach((sibling) => {
-        const search = [...action.address];
+        search = [...action.address];
         search.push(sibling.name);
         const newNode = updateAddresses(sibling, search);
         newTree = updateNodeInTree(newTree, newNode, search);
-      })
+      });
 
       const prev = state.addressMap.get(action.address.toString());
       if (prev) {
@@ -607,26 +707,26 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
       newAddressMap.forEach((value, address) => {
         const prev = state.addressMap.get(address);
         if (prev)
-          newAddressMap.set(address, { 
+          newAddressMap.set(address, {
             ...prev,
             inputNode: "",
-            insertTarget: "sibling", 
+            insertTarget: "sibling",
           });
       });
-   
+
       if (prev?.display === false) {
         const prev = state.addressMap.get(action.address.toString());
         if (prev) {
           newAddressMap.set(action.address.toString(), {
             ...prev,
             display: true,
-          })
+          });
         }
       }
 
       return {
         ...state,
-        focus: [action.address],
+        focus: [search],
         editing: {
           ...state.editing,
           node: false,
@@ -661,16 +761,18 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
       const newAddressMap = createAddressMap(newTree, new Map());
       newAddressMap.forEach((value, address) => {
         const prev = state.addressMap.get(address);
-        if (prev)
-          newAddressMap.set(address, { ...prev});
+        if (prev) newAddressMap.set(address, { ...prev });
       });
-      
-      if (state.addressMap.get(
-        sibling[1].address.toString()
-      )?.display === false) {
-        const prev = state.addressMap.get(sibling[1].address.toString())
+
+      if (
+        state.addressMap.get(sibling[1].address.toString())?.display === false
+      ) {
+        const prev = state.addressMap.get(sibling[1].address.toString());
         if (prev) {
-          newAddressMap.set(sibling[1].address.toString(), {...prev, display: true});
+          newAddressMap.set(sibling[1].address.toString(), {
+            ...prev,
+            display: true,
+          });
         }
       }
 
@@ -729,13 +831,13 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
 
       newAddressMap.forEach((value, address) => {
         const prev = state.addressMap.get(address);
-        if (prev)
-          newAddressMap.set(address, { ...prev });
+        if (prev) newAddressMap.set(address, { ...prev });
       });
 
       return {
         ...state,
         tree: newTree,
+        focus: [action.node.address],
         addressMap: newAddressMap,
       };
     }
@@ -767,8 +869,7 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
       const newAddressMap = createAddressMap(newTree, new Map());
       newAddressMap.forEach((value, address) => {
         const prev = state.addressMap.get(address);
-        if (prev)
-          newAddressMap.set(address, { ...prev });
+        if (prev) newAddressMap.set(address, { ...prev });
       });
 
       return {
@@ -785,9 +886,11 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
 }
 
 export {
+  createNode,
   initializeState,
   getNodeFromTree,
   getParentAddress,
   getNextParent,
   treeReducer,
+  nodeToString,
 };

@@ -14,11 +14,19 @@ exports.user_register_post = [
   body("username", "username must not be empty.")
     .trim()
     .isLength({ min: 5, max: 20 })
-    .escape(),
+    .escape()
+    .custom((value) => {
+      return User.findOne({ where: { username: value } }).then((res) => {
+        if (res)
+          return Promise.reject("Username already taken");
+      });
+    }),
+
   body("password", "Password must not be empty")
     .trim()
     .isLength({ min: 6 })
     .escape(),
+
   body("confirmPassword", "Password confirmation must match password")
     .trim()
     .custom((value, { req }) => value === req.body.password)
@@ -36,7 +44,14 @@ exports.user_register_post = [
           password: hashedPassword,
         })
           .then((result) => res.json({ success: true, user: result }))
-          .catch((err) => res.json({ success: false, msg: err }));
+          .catch((err) =>
+            res.json({
+              success: false,
+              errors: [
+                { msg: "Registration error.", err: err },
+              ],
+            })
+          );
       });
     }
   },
@@ -91,12 +106,24 @@ exports.user_login_post = [
             } else {
               res
                 .status(401)
-                .json({ success: false, errors: [{msg: "Incorrect password", param: 'password' }]});
+                .json({
+                  success: false,
+                  errors: [
+                    { msg: "Incorrect password", param: "password", err: err },
+                  ],
+                });
             }
           });
         })
         .catch((err) =>
-          res.status(401).json({ success: false, errors: [{msg: "Incorrect username", param: 'username' }] })
+          res
+            .status(401)
+            .json({
+              success: false,
+              errors: [
+                { msg: "Incorrect username", param: "username", err: err },
+              ],
+            })
         );
     }
   },

@@ -5,6 +5,8 @@
   "dependencies": {
     "@emotion/react": "^11.10.4",
     "@emotion/styled": "^11.10.4",
+    "@fontsource/dejavu-mono": "^4.5.4",
+    "@mui/icons-material": "^5.10.6",
     "@mui/material": "^5.10.7",
     "@testing-library/jest-dom": "^5.16.1",
     "@testing-library/react": "^12.1.2",
@@ -23,7 +25,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "watch": "node scripts/watch.js"
   },
   "eslintConfig": {
     "extends": [

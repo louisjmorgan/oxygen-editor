@@ -21,7 +21,15 @@ const User = sequelize.define(
       allowNull: false,
     },
   },
-  {}
+  {
+    indexes: [
+      {
+          name: 'unique_index',
+          unique: true,
+          fields: ['username', 'id']
+      }
+  ],
+  }
 );
 
 module.exports = User

@@ -1,11 +1,16 @@
+import { Button, Input } from "@mui/material";
 import * as React from "react";
 import { ACTIONTYPE, AddressMapItem, Node as NodeType } from "../Model/Types";
 
-const e = React.createElement;
 
 const styles: { [key: string]: React.CSSProperties } = {
   insertNode: {
     marginTop: "0.5em",
+    background: 'rgba(0, 0, 0, 0)',
+    border: 'none',
+    outline: 'none',
+    color: 'white',
+    fontFamily: `"DejaVu Mono", monospace`,
   },
 
   saveButton: {
@@ -22,6 +27,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     border: "none",
     borderRadius: "2px",
     fontFamily: "Segoe UI Symbol",
+    background: "transparent",
   },
 };
 
@@ -49,28 +55,28 @@ const InsertNodeField = ({ node, dispatch, addressMap, submitInsertChild, submit
   };
 
   return <>
-  {addressMap.editNode && 
-      e(
-        "div",
-        null,
-        e("input", {
-          autoFocus: true,
-          style: {marginLeft: addressMap.insertTarget === "child" ? "6em": "2.5em" ,...styles.insertNode},
-          value: addressMap.inputNode,
-          onChange: handleInput,
-        }),
-        e(
-          "button",
-          {
-            onClick: handleSubmit,
-            style: {
-              ...styles.saveButton,
-            },
-          },
-          "💾"
-        )
-      )}
-    </>
+  {addressMap.editNode && (
+    <div>
+      <Input
+        autoFocus
+        style={{
+          marginLeft: addressMap.insertTarget === "child" ? "5em": "2rem" ,...styles.insertNode
+        }}
+        value={addressMap.inputNode}
+        onChange={handleInput}
+        disableUnderline
+      />
+      <Button
+          onClick={handleSubmit}
+          style={{
+            ...styles.saveButton,
+          }}
+        >
+        💾
+      </Button>
+    </div>
+  )}
+  </>
 };
 
 export default InsertNodeField;

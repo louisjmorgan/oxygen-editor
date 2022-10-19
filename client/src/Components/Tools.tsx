@@ -28,6 +28,7 @@ const styles = {
 
 type ToolsProps = {
   showTools: boolean,
+  isRoot: boolean,
   editName: () => void,
   copyNode: () => void,
   pasteNode: () => void,
@@ -38,6 +39,7 @@ type ToolsProps = {
 
 function Tools({
   showTools,
+  isRoot,
   editName,
   copyNode,
   pasteNode,

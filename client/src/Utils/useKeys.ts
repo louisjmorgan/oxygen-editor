@@ -10,12 +10,13 @@ Object.values(commands).forEach((command) => {
 
 const useKeys = (state: State) => {
   const [pressedKeys, setPressedKeys] = useState<string[]>([]);
-
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
+      if (state.editing.modal) return;
       const key = e.key;
       if (key === "Enter") e.preventDefault();
       if (key === "ArrowLeft") e.preventDefault();
+      if (key === "Alt") e.preventDefault();
       if (
         key === "Tab" ||
         key === "Enter" ||
@@ -32,6 +33,8 @@ const useKeys = (state: State) => {
     };
 
     const onKeyUp = (e: KeyboardEvent) => {
+      if (state.editing.modal) return;
+
       const key = e.key;
       if (ALLOWED_KEYS.includes(key)) {
         setPressedKeys((previousPressedKeys) =>
