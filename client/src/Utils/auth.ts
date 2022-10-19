@@ -1,7 +1,7 @@
 import { fetchTrees } from "src/Model/Server";
 import { LoginError } from "src/Model/Types";
 
-
+const api = "https://pzzw3lsaz6.execute-api.eu-west-2.amazonaws.com"
 // type LoginResponse = {
 //   success: boolean,
 //   expiresIn?: string,
@@ -17,7 +17,7 @@ type RegisterResponse = {
 
 const login = async (username: string, password: string) => {
   const data = { username, password };
-  const loginResponse = await fetch("/users/login", {
+  const loginResponse = await fetch(`${api}/users/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -44,7 +44,7 @@ const login = async (username: string, password: string) => {
 
 const register = async (username: string, password: string, confirmPassword: string):Promise<RegisterResponse> => {
   const data = { username, password, confirmPassword };
-  return fetch("/users", {
+  return fetch(`${api}/users`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

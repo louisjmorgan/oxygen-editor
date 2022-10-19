@@ -2,8 +2,10 @@ import { getUser } from "src/Utils/auth";
 import { createNode, nodeToString } from "./Tree";
 import { LoadedTree, Node } from "./Types";
 
+const api = "https://pzzw3lsaz6.execute-api.eu-west-2.amazonaws.com"
+
 async function fetchTrees() {
-  const res =  await fetch("/trees", {
+  const res =  await fetch(`${api}/trees`, {
     method: "GET",
     headers: {
       Authorization: getUser(),
@@ -24,7 +26,7 @@ async function saveNewTree(name: string, tree: Node) {
     content: `${nodeToString(newRoot)}`
   };
 
-  const saveResponse = await fetch('/trees', {
+  const saveResponse = await fetch(`${api}/trees`, {
     method: "POST",
     headers: {
     "Content-Type": "application/json",
@@ -53,7 +55,7 @@ async function updateTree(loaded: LoadedTree, tree: Node) {
   };
 
 
-  const saveResponse = await fetch("/trees", {
+  const saveResponse = await fetch(`${api}/trees`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -78,7 +80,7 @@ async function deleteTree(loaded: LoadedTree) {
     id: loaded.id
   }
 
-  const deleteResponse = await fetch("/trees", {
+  const deleteResponse = await fetch(`${api}/trees`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
