@@ -3,3 +3,5 @@
 /server/dev.sqlite
 /server/id_rsa_priv.pem
 /server/id_rsa_pub.pem
+.env
+**/.env
