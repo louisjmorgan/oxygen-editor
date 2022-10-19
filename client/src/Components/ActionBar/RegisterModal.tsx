@@ -14,7 +14,7 @@ import {
   Input,
   FormHelperText,
 } from "@mui/material";
-import { getUser, login, register } from "../../Utils/auth";
+import { login, register } from "../../Utils/auth";
 import { ACTIONTYPE } from "src/Model/Types";
 
 // import AssignmentIndIcon from '@mui/icons-material';
