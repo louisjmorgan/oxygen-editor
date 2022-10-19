@@ -1,4 +1,6 @@
 import { fetchTrees } from "src/Model/Server";
+import { LoginError } from "src/Model/Types";
+
 
 
 // type LoginResponse = {

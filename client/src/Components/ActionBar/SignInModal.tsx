@@ -14,7 +14,7 @@ import {
   Input,
   FormHelperText,
 } from "@mui/material";
-import { getUser, login } from "../../Utils/auth";
+import {  login } from "../../Utils/auth";
 import { ACTIONTYPE, LoginError } from "src/Model/Types";
 
 
