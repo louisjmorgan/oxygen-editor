@@ -1,4 +1,4 @@
-const commands = {
+const shortcuts = {
   // global functionality
   undo: "Control,z",
   collapseAll: "Control, ",
@@ -35,4 +35,4 @@ const commands = {
 };
 
 
-export default commands;
+export default shortcuts;

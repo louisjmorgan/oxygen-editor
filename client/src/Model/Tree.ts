@@ -422,7 +422,6 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
     }
 
     case "delete child": {
-      console.log(action)
       const parent = getNodeFromTree(action.node.address, state.tree);
       const newTree = deleteChild(parent, action.child, state.tree);
       const newAddressMap = createAddressMap(newTree, new Map());
@@ -442,7 +441,6 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
         if (action.child.index === 0) newFocus = [siblings[0][1].address];
         else newFocus = [siblings[action.child.index - 1][1].address];
       }
-      console.log(newFocus)
 
       return {
         ...state,
@@ -599,7 +597,6 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
         newClipBoard +=
           nodeToString(getNodeFromTree(address, state.tree)) + "\n";
       });
-      console.log(newClipBoard);
       try {
         navigator.clipboard.writeText(newClipBoard);
       } catch (err) {

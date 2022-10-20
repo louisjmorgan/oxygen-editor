@@ -1,6 +1,4 @@
 -alert dialogs
-  -login to use
--focus after using tools
 -new tree template
 -empty my trees
 -text area dialog (paste multiple)

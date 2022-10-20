@@ -3,7 +3,6 @@ import * as React from "react";
 import { ACTIONTYPE, Node as NodeType } from "../Model/Types";
 import Tools from "./Tools";
 const { useState, useEffect } = React;
-const e = React.createElement;
 
 const styles: { [key: string]: React.CSSProperties } = {
   nameField: {
@@ -98,7 +97,6 @@ const NameField = ({
   const focusSelf = (
     event: React.MouseEvent<HTMLButtonElement | HTMLDivElement>
   ) => {
-    if (event.currentTarget.id === "delete") return;
     dispatch({
       type: "unfocus all",
     });
@@ -146,9 +144,9 @@ const NameField = ({
     });
   }
 
-  return <div  style={styles.nameField}>
+  return <div style={styles.nameField}>
     {edit ? (
-      <div onClick={focusSelf}>
+      <div  style={{zIndex: 4}}>
         <Input
           autoFocus
           style={{ ...styles.input }}
@@ -166,7 +164,7 @@ const NameField = ({
         </Button>
       </div>
     ) : (
-      e("p", { style: styles.token }, `${node.name}`)
+      <p style={styles.token} onClick={focusSelf}>{node.name}</p>
     )}
     {edit ? (
       ""
