@@ -25,6 +25,8 @@ const styles = {
   borderRadius: 0,
   boxShadow: "1px 2px #000",
   zIndex: 5,
+  maxWidth: '100vw',
+  minWidth: '100vw',
 };
 
 type ActionBarProps = {
@@ -84,7 +86,6 @@ function ActionBar({ state, dispatch, collapseAll }: ActionBarProps) {
     })
   }
   return (
-    <>
       <ButtonGroup
         color="secondary"
         variant="text"
@@ -122,9 +123,7 @@ function ActionBar({ state, dispatch, collapseAll }: ActionBarProps) {
             </>
           )}
         </Box>
-      </ButtonGroup>
-
-      <SignInModal
+        <SignInModal
         open={isOpenSignIn}
         handleClose={handleCloseSignIn}
         dispatch={dispatch}
@@ -135,7 +134,9 @@ function ActionBar({ state, dispatch, collapseAll }: ActionBarProps) {
         dispatch={dispatch}
       />
       <AlertDialog dialog={state.errorDialog} handleClose={handleCloseError} />
-    </>
+      </ButtonGroup>
+
+      
   );
 }
 

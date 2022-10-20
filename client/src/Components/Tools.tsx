@@ -4,8 +4,12 @@ const e = React.createElement;
 
 const styles = {
   tools: {
+    position: 'absolute',
     display: "flex",
     alignContent: "center",
+    top: 0,
+    bottom: 0,
+    left: '100%',
   },
 
   toolButton: {

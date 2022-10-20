@@ -19,9 +19,9 @@ const { useState, useEffect, useReducer } = React;
 const theme = createTheme({
   palette: {
     secondary: {
-      main: '#FFF'
-    }
-  }
+      main: "#FFF",
+    },
+  },
 });
 
 const code =
@@ -121,16 +121,15 @@ function App() {
   }, [pressedKeys]);
   return (
     <ThemeProvider theme={theme}>
-      <Box sx={{ padding: "2rem", width: "100vw" }} className="App">
-        {isLoaded && (
-          <>
-           <ActionBar
-           state={state}
-           dispatch={dispatch}
-           collapseAll={collapseAll}
-         />
+      {isLoaded && (
+        <>
+          <ActionBar
+            state={state}
+            dispatch={dispatch}
+            collapseAll={collapseAll}
+          />
           <main className="App-main">
-           
+            <Box sx={{overflow: 'auto', width: '100%', padding: '2rem 1rem'}}>
             <Node
               node={state.tree}
               key="root"
@@ -146,10 +145,10 @@ function App() {
               dispatch={dispatch}
               deleteFromParent={() => {}}
             />
+            </Box>
           </main>
-          </>
-        )}
-      </Box>
+        </>
+      )}
     </ThemeProvider>
   );
 }

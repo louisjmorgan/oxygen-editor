@@ -15,12 +15,15 @@ const styles: { [key: string]: React.CSSProperties } = {
     marginLeft: "3em",
     textAlign: "left",
     transition: "0.3s ease-in",
+    whiteSpace: 'nowrap',
+    cursor: 'pointer'
   },
 
   flex: {
     display: "flex",
     height: "2em",
     alignItems: "center",
+
   },
 
   collapseChildren: {
@@ -71,6 +74,7 @@ const Node = ({
       ref.current.scrollIntoView({
         behavior: "smooth",
         block: "center",
+        inline: "center",
       });
     }
   }, [focussed, node.address, node.index]);
@@ -176,13 +180,13 @@ const Node = ({
   return (
     <>
       {visible && (
-        <div style={styles.node}>
+        <div style={{...styles.node, width: `${node.name.length + 10}ch`}}>
           <div
             ref={ref}
             style={{
               ...styles.flex,
               outline: focussed > -1 ? "solid white 1px" : "none",
-              color: isRoot ? 'lightgreen' : ''
+              color: isRoot ? "lightgreen" : "",
             }}
             onClick={focusSelf}
             onMouseEnter={displayTools}
@@ -193,8 +197,7 @@ const Node = ({
               style={{
                 opacity: node.children.size > 0 ? 1 : 0,
                 ...styles.collapseChildren,
-              color: isRoot ? 'lightgreen' : 'white'
-
+                color: isRoot ? "lightgreen" : "white",
               }}
               tabIndex={-1}
             >
@@ -212,7 +215,7 @@ const Node = ({
               submitInsertChild={submitInsertChild}
               deleteSelf={deleteSelf}
             />
-            {isRoot ? `\xa0(root)` : ''}
+            {isRoot ? `\xa0(root)` : ""}
           </div>
           <InsertNodeField
             node={node}

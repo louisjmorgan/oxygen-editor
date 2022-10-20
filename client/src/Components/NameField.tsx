@@ -9,6 +9,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   nameField: {
     position: "relative",
     display: "flex",
+    
   },
   input: {
     background: "rgba(0, 0, 0, 0)",
@@ -19,6 +20,8 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   token: {
     display: "inline",
+    width: '100%',
+    whiteSpace: 'nowrap'
   },
 
   saveButton: {
