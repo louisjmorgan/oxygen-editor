@@ -1,13 +1,13 @@
 import { getNextParent, getNodeFromTree, getParentAddress } from "../Model/Tree";
 import { ACTIONTYPE, State } from "../Model/Types";
-import commands from "./commands";
+import shortcuts from "./shortcuts";
 
 const keyHandler = (dispatch: (action: ACTIONTYPE) => void, pressedKeys: string[], state: State, collapseAll: () => void) => {
 if (pressedKeys[0]) {
   if (state.editing.name) {
     switch (pressedKeys[0].toString()) {
       // while editing name
-      case commands.submit: {
+      case shortcuts.submit: {
         const node = getNodeFromTree(state.focus[0], state.tree);
         dispatch({
           type: "submit name",
@@ -16,7 +16,7 @@ if (pressedKeys[0]) {
         return;
       }
 
-      case commands.cancel: {
+      case shortcuts.cancel: {
         dispatch({
           type: "edit name",
           address: state.focus[0],
@@ -28,7 +28,7 @@ if (pressedKeys[0]) {
   } else if (state.editing.node) {
     switch (pressedKeys[0].toString()) {
       // while inserting nodes
-      case commands.submit: {
+      case shortcuts.submit: {
         const node = getNodeFromTree(state.focus[0], state.tree);
         const input = state.addressMap.get(state.focus[0].toString());
         if (
@@ -61,7 +61,7 @@ if (pressedKeys[0]) {
         return;
       }
 
-      case commands.cancel: {
+      case shortcuts.cancel: {
         dispatch({
           type: "edit node",
           address: state.focus[0],
@@ -70,7 +70,7 @@ if (pressedKeys[0]) {
         return;
       }
 
-      case commands.indent: {
+      case shortcuts.indent: {
         const prev = state.addressMap.get(
           state.focus[0].toString()
         )?.insertTarget;
@@ -96,18 +96,18 @@ if (pressedKeys[0]) {
 
     switch (condition) {
       // global functionality
-      case commands.undo: {
+      case shortcuts.undo: {
         dispatch({ type: "undo" });
         return;
       }
 
-      case commands.collapseAll: {
+      case shortcuts.collapseAll: {
         collapseAll();
         return;
       }
 
       // moving nodes around
-      case commands.shiftUp: {
+      case shortcuts.shiftUp: {
         const node = getNodeFromTree(state.focus[0], state.tree);
         if (node.index > 0) {
           dispatch({
@@ -119,7 +119,7 @@ if (pressedKeys[0]) {
         return;
       }
 
-      case commands.shiftDown: {
+      case shortcuts.shiftDown: {
         if (state.focus[0].toString() === "root") return;
         const node = getNodeFromTree(state.focus[0], state.tree);
         const parent = getNodeFromTree(
@@ -136,7 +136,7 @@ if (pressedKeys[0]) {
         return;
       }
 
-      case commands.shiftLeft: {
+      case shortcuts.shiftLeft: {
         const node = getNodeFromTree(state.focus[0], state.tree);
         const parentAddress = getParentAddress(state.focus[0]);
         if (parentAddress.toString() === "root") return;
@@ -147,7 +147,7 @@ if (pressedKeys[0]) {
         return;
       }
 
-      case commands.shiftRight: {
+      case shortcuts.shiftRight: {
         const node = getNodeFromTree(state.focus[0], state.tree);
         if (node.index !== 0) {
           dispatch({
@@ -159,7 +159,7 @@ if (pressedKeys[0]) {
       }
 
       // ui
-      case commands.focusChild: {
+      case shortcuts.focusChild: {
         const node = getNodeFromTree(state.focus[0], state.tree);
 
         if (node.children.size > 0) {
@@ -197,7 +197,7 @@ if (pressedKeys[0]) {
         return;
       }
 
-      case commands.focusParent: {
+      case shortcuts.focusParent: {
         const parentAddress = getParentAddress(state.focus[0]);
         if (parentAddress.toString() === 'root') return;
         dispatch({
@@ -210,7 +210,7 @@ if (pressedKeys[0]) {
         return;
       }
 
-      case commands.focusBelow: {
+      case shortcuts.focusBelow: {
         const node = getNodeFromTree(state.focus[0], state.tree);
         if (state.focus[0].toString() === "root") {
           dispatch({
@@ -270,7 +270,7 @@ if (pressedKeys[0]) {
         return;
       }
 
-      case commands.focusAbove: {
+      case shortcuts.focusAbove: {
         if (state.focus[0].toString() === "root") return;
         const node = getNodeFromTree(state.focus[0], state.tree);
         const parentAddress = getParentAddress(state.focus[0])
@@ -300,7 +300,7 @@ if (pressedKeys[0]) {
       }
       
 
-      case commands.addFocusAbove: {
+      case shortcuts.addFocusAbove: {
         if (state.focus[0].toString() === "root") return;
         const node = getNodeFromTree(state.focus[0], state.tree);
         const parentAddress = getParentAddress(state.focus[0])
@@ -319,7 +319,7 @@ if (pressedKeys[0]) {
         return;
       }
 
-      case commands.addFocusBelow: {
+      case shortcuts.addFocusBelow: {
         if (state.focus[0].toString() === "root") return;
         const node = getNodeFromTree(state.focus[0], state.tree);
         const parent = getNodeFromTree(
@@ -335,7 +335,7 @@ if (pressedKeys[0]) {
         return;
       }
 
-      case commands.showHide: {
+      case shortcuts.showHide: {
         state.focus.forEach((address) => {    
           const node = getNodeFromTree(address, state.tree);
           const prev = state.addressMap.get(address.toString())?.display;
@@ -349,7 +349,7 @@ if (pressedKeys[0]) {
       }
 
       // deleting, editing and inserting nodes
-      case commands.delete: {
+      case shortcuts.delete: {
         const toDelete = [...state.focus]
         toDelete.forEach((address) => {
           if (address.toString() === "root") return;
@@ -364,7 +364,7 @@ if (pressedKeys[0]) {
         return;
       }
 
-      case commands.paste: {
+      case shortcuts.paste: {
         state.focus.forEach((address) => {
           navigator.clipboard.readText().then((text) =>
             dispatch({
@@ -377,7 +377,7 @@ if (pressedKeys[0]) {
         return;
       }
 
-      case commands.editNode: {
+      case shortcuts.editNode: {
         dispatch({
           type: "edit name",
           address: state.focus[0],
@@ -386,7 +386,7 @@ if (pressedKeys[0]) {
         return;
       }
 
-      case commands.newNode: {
+      case shortcuts.newNode: {
         dispatch({
           type: "edit node",
           address: state.focus[0],
@@ -396,7 +396,7 @@ if (pressedKeys[0]) {
       }
 
       //copying
-      case commands.copyNode: {
+      case shortcuts.copyNode: {
         state.focus.forEach((address) => {
           dispatch({
             type: "copy node",
@@ -405,7 +405,7 @@ if (pressedKeys[0]) {
         return;
       }
 
-      case commands.copyAddress: {
+      case shortcuts.copyAddress: {
         state.focus.forEach((address) => {
           dispatch({
             type: "copy address",

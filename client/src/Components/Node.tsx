@@ -87,20 +87,10 @@ const Node = ({
     });
   };
 
-  const focusSelf = (
-    event: React.MouseEvent<HTMLButtonElement | HTMLDivElement>
-  ) => {
-    if (event.currentTarget.id === "delete") return;
-    dispatch({
-      type: "unfocus all",
-    });
-    dispatch({
-      type: "focus node",
-      address: node.address,
-    });
-  };
+
 
   const deleteChild = (child: NodeType) => {
+
     dispatch({
       type: "delete child",
       node: node,
@@ -172,7 +162,7 @@ const Node = ({
         key={child.name}
         focussed={findFocusIndex(child.address)}
         findFocusIndex={findFocusIndex}
-        deleteFromParent={deleteChild}
+        deleteFromParent={() => deleteChild(child)}
       />
     )
   );
@@ -188,7 +178,6 @@ const Node = ({
               outline: focussed > -1 ? "solid white 1px" : "none",
               color: isRoot ? "lightgreen" : "",
             }}
-            onClick={focusSelf}
             onMouseEnter={displayTools}
             onMouseLeave={hideTools}
           >

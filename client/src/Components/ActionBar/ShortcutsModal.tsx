@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Modal, Box, Typography, TableBody, TableRow, TableCell }from '@mui/material';
-import commands from '../../Utils/commands';
+import shortcuts from '../../Utils/shortcuts';
 
 const style = {
   position: 'absolute' as 'absolute',
@@ -16,7 +16,7 @@ const style = {
   overflowY: 'auto',
 };
 
-const commandsDict = {
+const shortcutsDict = {
   global: [
     {
       key: "undo",
@@ -129,10 +129,10 @@ function ShortcutsModal({open, handleClose}: ShortcutsProps) {
         Global:
       </Typography>
       <TableBody>
-        {commandsDict.global.map((command) => (
-          <TableRow key={command.key}>
-            <TableCell>{command.description}</TableCell>
-            <TableCell>{commands[command.key]}</TableCell>
+        {shortcutsDict.global.map((shortcut) => (
+          <TableRow key={shortcut.key}>
+            <TableCell>{shortcut.description}</TableCell>
+            <TableCell>{shortcuts[shortcut.key]}</TableCell>
           </TableRow>
         ))}
       </TableBody>
@@ -140,10 +140,10 @@ function ShortcutsModal({open, handleClose}: ShortcutsProps) {
         Moving nodes:
       </Typography>
       <TableBody>
-        {commandsDict.moving.map((command) => (
-          <TableRow key={command.key}>
-            <TableCell>{command.description}</TableCell>
-            <TableCell>{commands[command.key]}</TableCell>
+        {shortcutsDict.moving.map((shortcut) => (
+          <TableRow key={shortcut.key}>
+            <TableCell>{shortcut.description}</TableCell>
+            <TableCell>{shortcuts[shortcut.key]}</TableCell>
           </TableRow>
         ))}
       </TableBody>
@@ -151,10 +151,10 @@ function ShortcutsModal({open, handleClose}: ShortcutsProps) {
         UI:
       </Typography>
       <TableBody>
-        {commandsDict.ui.map((command) => (
-          <TableRow key={command.key}>
-            <TableCell>{command.description}</TableCell>
-            <TableCell>{commands[command.key]}</TableCell>
+        {shortcutsDict.ui.map((shortcut) => (
+          <TableRow key={shortcut.key}>
+            <TableCell>{shortcut.description}</TableCell>
+            <TableCell>{shortcuts[shortcut.key]}</TableCell>
           </TableRow>
         ))}
       </TableBody>
@@ -162,10 +162,10 @@ function ShortcutsModal({open, handleClose}: ShortcutsProps) {
         Editing tree:
       </Typography>
       <TableBody>
-        {commandsDict.editing.map((command) => (
-          <TableRow key={command.key}>
-            <TableCell>{command.description}</TableCell>
-            <TableCell>{commands[command.key]}</TableCell>
+        {shortcutsDict.editing.map((shortcut) => (
+          <TableRow key={shortcut.key}>
+            <TableCell>{shortcut.description}</TableCell>
+            <TableCell>{shortcuts[shortcut.key]}</TableCell>
           </TableRow>
         ))}
       </TableBody>

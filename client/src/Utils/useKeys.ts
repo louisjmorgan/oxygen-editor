@@ -1,9 +1,9 @@
-import commands from "./commands";
+import shortcuts from "./shortcuts";
 import { useState, useEffect } from "react";
 import { State } from "../Model/Types";
 
 const ALLOWED_KEYS: string[] = [];
-Object.values(commands).forEach((command) => {
+Object.values(shortcuts).forEach((command) => {
   const array = command.split(",");
   array.forEach((entry) => ALLOWED_KEYS.push(entry));
 });

@@ -95,6 +95,19 @@ const NameField = ({
     });
   };
 
+  const focusSelf = (
+    event: React.MouseEvent<HTMLButtonElement | HTMLDivElement>
+  ) => {
+    if (event.currentTarget.id === "delete") return;
+    dispatch({
+      type: "unfocus all",
+    });
+    dispatch({
+      type: "focus node",
+      address: node.address,
+    });
+  };
+
   const pasteNode = () => {
     try {
       navigator.clipboard.readText().then((text) => submitInsertChild(text));
@@ -133,11 +146,9 @@ const NameField = ({
     });
   }
 
-  return e(
-    "div",
-    { style: styles.nameField },
-    edit ? (
-      <div>
+  return <div  style={styles.nameField}>
+    {edit ? (
+      <div onClick={focusSelf}>
         <Input
           autoFocus
           style={{ ...styles.input }}
@@ -156,9 +167,8 @@ const NameField = ({
       </div>
     ) : (
       e("p", { style: styles.token }, `${node.name}`)
-    ),
-
-    edit ? (
+    )}
+    {edit ? (
       ""
     ) : (
       <Tools
@@ -171,8 +181,8 @@ const NameField = ({
         deleteSelf={deleteSelf}
         editNode={editNode}
       />
-    )
-  );
+    )}
+  </div>
 };
 
 export default NameField;
