@@ -1,7 +1,6 @@
 import { Button, Input } from "@mui/material";
 import * as React from "react";
 import { ACTIONTYPE, Node as NodeType } from "../Model/Types";
-import Tools from "./Tools";
 const { useState, useEffect } = React;
 
 const styles: { [key: string]: React.CSSProperties } = {
@@ -43,23 +42,17 @@ const styles: { [key: string]: React.CSSProperties } = {
 type NameFieldProps = {
   node: NodeType;
   dispatch: (action: ACTIONTYPE) => void;
-  showTools: boolean;
   isRoot: boolean;
   edit: boolean;
   submitEdit: () => void;
   submitInsertChild: (input: string) => void;
-  deleteSelf: () => void;
 };
 
 const NameField = ({
   node,
   dispatch,
-  showTools,
-  isRoot,
   edit,
   submitEdit,
-  submitInsertChild,
-  deleteSelf,
 }: NameFieldProps) => {
   const [input, setInput] = useState(node.name);
 
@@ -81,18 +74,18 @@ const NameField = ({
     submitEdit();
   };
 
-  const copyNode = () => {
-    dispatch({
-      type: "unfocus all",
-    });
-    dispatch({
-      type: "focus node",
-      address: node.address,
-    });
-    dispatch({
-      type: "copy node",
-    });
-  };
+  // const copyNode = () => {
+  //   dispatch({
+  //     type: "unfocus all",
+  //   });
+  //   dispatch({
+  //     type: "focus node",
+  //     address: node.address,
+  //   });
+  //   dispatch({
+  //     type: "copy node",
+  //   });
+  // };
 
   const focusSelf = (
     event: React.MouseEvent<HTMLButtonElement | HTMLDivElement>
@@ -106,43 +99,43 @@ const NameField = ({
     });
   };
 
-  const pasteNode = () => {
-    try {
-      navigator.clipboard.readText().then((text) => submitInsertChild(text));
-    } catch (err) {
-      console.error("Unable to paste", err);
-    }
-  };
+  // const pasteNode = () => {
+  //   try {
+  //     navigator.clipboard.readText().then((text) => submitInsertChild(text));
+  //   } catch (err) {
+  //     console.error("Unable to paste", err);
+  //   }
+  // };
 
-  const copyAddress = () => {
-    dispatch({
-      type: "unfocus all",
-    });
-    dispatch({
-      type: "focus node",
-      address: node.address,
-    });
-    dispatch({
-      type: "copy address",
-      address: node.address,
-    });
-  };
+  // const copyAddress = () => {
+  //   dispatch({
+  //     type: "unfocus all",
+  //   });
+  //   dispatch({
+  //     type: "focus node",
+  //     address: node.address,
+  //   });
+  //   dispatch({
+  //     type: "copy address",
+  //     address: node.address,
+  //   });
+  // };
 
-  function editNode() {
-    dispatch({
-      type: "edit node",
-      address: node.address,
-      edit: true,
-    });
-  }
+  // function editNode() {
+  //   dispatch({
+  //     type: "edit node",
+  //     address: node.address,
+  //     edit: true,
+  //   });
+  // }
 
-  function editName() {
-    dispatch({
-      type: "edit name",
-      address: node.address,
-      edit: true,
-    });
-  }
+  // function editName() {
+  //   dispatch({
+  //     type: "edit name",
+  //     address: node.address,
+  //     edit: true,
+  //   });
+  // }
 
   return <div style={styles.nameField}>
     {edit ? (
@@ -165,20 +158,6 @@ const NameField = ({
       </div>
     ) : (
       <p style={styles.token} onClick={focusSelf}>{node.name}</p>
-    )}
-    {edit ? (
-      ""
-    ) : (
-      <Tools
-        showTools={showTools}
-        isRoot={isRoot}
-        editName={editName}
-        copyNode={copyNode}
-        pasteNode={pasteNode}
-        copyAddress={copyAddress}
-        deleteSelf={deleteSelf}
-        editNode={editNode}
-      />
     )}
   </div>
 };

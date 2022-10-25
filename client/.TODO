@@ -3,3 +3,5 @@
 -empty my trees
 -text area dialog (paste multiple)
 -shortcuts dialog
+-icon buttons responsive
+-don't focus collapsed

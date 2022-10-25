@@ -7,7 +7,7 @@ import {
   AddressMapItem,
   Node as NodeType,
 } from "../Model/Types";
-const { useState, useRef } = React;
+const {useRef } = React;
 
 const styles: { [key: string]: React.CSSProperties } = {
   node: {
@@ -52,7 +52,6 @@ type NodeProps = {
   focussed: number;
   visible: boolean;
   displayChildren: boolean;
-  deleteFromParent: (child: NodeType) => void;
 };
 
 const Node = ({
@@ -64,9 +63,7 @@ const Node = ({
   focussed,
   visible,
   displayChildren,
-  deleteFromParent,
 }: NodeProps) => {
-  const [tools, setTools] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
@@ -81,33 +78,8 @@ const Node = ({
 
   const toggleDisplayChildren = () => {
     dispatch({
-      type: "set display children",
-      node: node,
-      display: !displayChildren,
+      type: "toggle display children",
     });
-  };
-
-
-
-  const deleteChild = (child: NodeType) => {
-
-    dispatch({
-      type: "delete child",
-      node: node,
-      child: child,
-    });
-  };
-
-  const displayTools = () => {
-    setTools(true);
-  };
-
-  const hideTools = () => {
-    setTools(false);
-  };
-
-  const deleteSelf = () => {
-    deleteFromParent(node);
   };
 
   const updateNodeName = () => {
@@ -121,7 +93,6 @@ const Node = ({
     if (!input) {
       dispatch({
         type: "edit node",
-        address: node.address,
         edit: false,
       });
       return;
@@ -137,7 +108,6 @@ const Node = ({
     if (!input) {
       dispatch({
         type: "edit node",
-        address: node.address,
         edit: false,
       });
       return;
@@ -162,7 +132,6 @@ const Node = ({
         key={child.name}
         focussed={findFocusIndex(child.address)}
         findFocusIndex={findFocusIndex}
-        deleteFromParent={() => deleteChild(child)}
       />
     )
   );
@@ -178,8 +147,6 @@ const Node = ({
               outline: focussed > -1 ? "solid white 1px" : "none",
               color: isRoot ? "lightgreen" : "",
             }}
-            onMouseEnter={displayTools}
-            onMouseLeave={hideTools}
           >
             <button
               onClick={toggleDisplayChildren}
@@ -195,14 +162,12 @@ const Node = ({
             <NameField
               node={node}
               dispatch={dispatch}
-              showTools={!isRoot && tools}
               isRoot={isRoot}
               edit={
                 addressMap.get(node.address.toString())?.editName as boolean
               }
               submitEdit={updateNodeName}
               submitInsertChild={submitInsertChild}
-              deleteSelf={deleteSelf}
             />
             {isRoot ? `\xa0(root)` : ""}
           </div>

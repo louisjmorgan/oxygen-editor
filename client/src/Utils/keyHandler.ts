@@ -19,7 +19,6 @@ if (pressedKeys[0]) {
       case shortcuts.cancel: {
         dispatch({
           type: "edit name",
-          address: state.focus[0],
           edit: false,
         });
         return;
@@ -40,7 +39,6 @@ if (pressedKeys[0]) {
         if (!input) {
           dispatch({
             type: "edit node",
-            address: node.address,
             edit: false,
           });
           return;
@@ -64,7 +62,6 @@ if (pressedKeys[0]) {
       case shortcuts.cancel: {
         dispatch({
           type: "edit node",
-          address: state.focus[0],
           edit: false,
         });
         return;
@@ -163,22 +160,13 @@ if (pressedKeys[0]) {
         const node = getNodeFromTree(state.focus[0], state.tree);
 
         if (node.children.size > 0) {
-          const displayChildren = state.addressMap.get(
-            node.address.toString()
-          )?.display;
-          if (displayChildren === false) {
-            dispatch({
-              type: "set display children",
-              node: node,
-              display: true,
-            });
-          }
+          const nextFocus = node.children.values().next().value.address
           dispatch({
             type: "unfocus all",
           });
           dispatch({
             type: "focus node",
-            address: node.children.values().next().value.address,
+            address: nextFocus,
           });
         } else {
           const [superParent, parent] = getNextParent(node, state.tree);
@@ -237,22 +225,13 @@ if (pressedKeys[0]) {
         } else {
           const [superParent, parent] = getNextParent(node, state.tree);
           if (node.children.size > 0) {
-            const displayChildren = state.addressMap.get(
-              node.address.toString()
-            )?.display;
-            if (displayChildren === false) {
-              dispatch({
-                type: "set display children",
-                node: node,
-                display: true,
-              });
-            }
+            const nextFocus = node.children.values().next().value.address;
             dispatch({
               type: "unfocus all",
             });
             dispatch({
               type: "focus node",
-              address: node.children.values().next().value.address,
+              address: nextFocus,
             });
           } else {
             if (parent.index < superParent.children.size - 1) {
@@ -336,31 +315,18 @@ if (pressedKeys[0]) {
       }
 
       case shortcuts.showHide: {
-        state.focus.forEach((address) => {    
-          const node = getNodeFromTree(address, state.tree);
-          const prev = state.addressMap.get(address.toString())?.display;
-          dispatch({
-            type: "set display children",
-            node: node,
-            display: !prev,
-          });
+        dispatch({
+          type: "toggle display children",
         });
         return;
       }
 
       // deleting, editing and inserting nodes
       case shortcuts.delete: {
-        const toDelete = [...state.focus]
-        toDelete.forEach((address) => {
-          if (address.toString() === "root") return;
-          const node = getNodeFromTree(address, state.tree);
-          const parent = getNodeFromTree(getParentAddress(address),state.tree);
-          dispatch({
-            type: "delete child",
-            child: node,
-            node: parent,
-          });
-        });
+        dispatch({
+          type: 'delete'
+        })
+
         return;
       }
 
@@ -380,7 +346,6 @@ if (pressedKeys[0]) {
       case shortcuts.editNode: {
         dispatch({
           type: "edit name",
-          address: state.focus[0],
           edit: true,
         });
         return;
@@ -389,7 +354,6 @@ if (pressedKeys[0]) {
       case shortcuts.newNode: {
         dispatch({
           type: "edit node",
-          address: state.focus[0],
           edit: true,
         });
         return;

@@ -209,7 +209,7 @@ function getNextParent(node: Node, tree: Node): [parent: Node, node: Node] {
   else return getNextParent(parent, tree);
 }
 
-function createAddressMap(node: Node, map: AddressMap) {
+function createAddressMap(node: Node, map: AddressMap, previous?: AddressMap) {
   const initial: AddressMapItem = {
     display: true,
     editName: false,
@@ -222,6 +222,13 @@ function createAddressMap(node: Node, map: AddressMap) {
   node.children.forEach((child) => {
     createAddressMap(child, map);
   });
+
+  if (previous) {
+    map.forEach((value, address) => {
+      const prev = previous.get(address);
+      if (prev) map.set(address, { ...prev });
+    });
+  }
 
   return map;
 }
@@ -354,10 +361,25 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
 
     case "focus node": {
       if (action.address.toString() === 'root') return state
+      // set new focus
       const newFocus = [...state.focus];
       newFocus.unshift(action.address);
+
+      // display if collapsed
+      const parentAddress = getParentAddress(action.address)
+      const parent = state.addressMap.get(parentAddress.toString())
+      let newAddressMap = new Map(state.addressMap);
+      if (!parent?.display) {
+        if (parent) {
+          newAddressMap.set(parentAddress.toString(), {
+            ...parent,
+            display: true,
+          });
+        }
+      }
       return {
         ...state,
+        addressMap: newAddressMap,
         focus: newFocus,
       };
     }
@@ -379,22 +401,31 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
       };
     }
 
-    case "set display children": {
+    case "toggle display children": {
       let newAddressMap = new Map(state.addressMap);
-      if (action.display === false) {
-        newAddressMap = collapseChildren(action.node, newAddressMap);
-      } else {
-        const prev = state.addressMap.get(action.node.address.toString());
-        if (prev) {
-          newAddressMap.set(action.node.address.toString(), {
-            ...prev,
-            display: action.display,
-          });
-        }
-      }
-
       let collapsed = false;
-      if (action.node.address.toString() === "root") collapsed = true;
+      state.focus.forEach((address) => {    
+        const node = getNodeFromTree(address, state.tree);
+        const isDisplay = !state.addressMap.get(address.toString())?.display;
+
+        if (isDisplay === false) {
+          newAddressMap = collapseChildren(node, newAddressMap);
+        } else {
+          const prev = newAddressMap.get(address.toString());
+          if (prev) {
+            newAddressMap.set(address.toString(), {
+              ...prev,
+              display: isDisplay,
+            });
+          }
+        }
+
+        if (node.address.toString() === "root") collapsed = true;
+      
+      })
+      
+
+     
       return {
         ...state,
         collapsed: collapsed,
@@ -421,27 +452,33 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
       };
     }
 
-    case "delete child": {
-      const parent = getNodeFromTree(action.node.address, state.tree);
-      const newTree = deleteChild(parent, action.child, state.tree);
-      const newAddressMap = createAddressMap(newTree, new Map());
-      newAddressMap.forEach((value, address) => {
-        const prev = state.addressMap.get(address);
-        if (prev) newAddressMap.set(address, { ...prev });
-      });
+    case "delete": {
+      let newTree = state.tree
+      let newAddressMap = new Map(state.addressMap)
+      let newFocus = [...state.focus]
+      const toDelete = [...state.focus]
+      toDelete.forEach((address) => {
+          if (address.toString() === "root") return;
+          // get nodes from focus
+          const child = getNodeFromTree(address, newTree);
+          const parentAddress = getParentAddress(address)
+          const parent = getNodeFromTree(parentAddress, newTree);
 
-      const newParent = getNodeFromTree(action.node.address, newTree);
+          // generate new tree and address map
+          newTree = deleteChild(parent, child, newTree);
+          newAddressMap = createAddressMap(newTree, new Map(), newAddressMap);
 
-      let newFocus = [...state.focus];
-
-      if (newParent.children.size === 0) {
-        newFocus = [action.node.address];
-      } else {
-        const siblings = [...newParent.children];
-        if (action.child.index === 0) newFocus = [siblings[0][1].address];
-        else newFocus = [siblings[action.child.index - 1][1].address];
-      }
-
+          // get new focus
+          const newParent = getNodeFromTree(parentAddress, newTree);
+          if (newParent.children.size === 0) {
+            newFocus = [parentAddress];
+          } else {
+            const siblings = [...newParent.children];
+            if (child.index === 0) newFocus = [siblings[0][1].address];
+            else newFocus = [siblings[child.index - 1][1].address];
+          }
+      })
+     
       return {
         ...state,
         focus: newFocus,
@@ -451,11 +488,12 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
     }
 
     case "edit name": {
-      if (action.address.toString() === "root") return state;
+      const address = state.focus[0]
+      if (address.toString() === "root") return state;
       const newAddressMap = new Map(state.addressMap);
-      const prev = state.addressMap.get(action.address.toString());
+      const prev = state.addressMap.get(address.toString());
       if (prev) {
-        newAddressMap.set(action.address.toString(), {
+        newAddressMap.set(address.toString(), {
           ...prev,
           editName: action.edit,
         });
@@ -555,10 +593,11 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
     }
 
     case "edit node": {
+      const address = state.focus[0]
       const newAddressMap = new Map(state.addressMap);
-      const prev = state.addressMap.get(action.address.toString());
+      const prev = state.addressMap.get(address.toString());
       if (prev) {
-        newAddressMap.set(action.address.toString(), {
+        newAddressMap.set(address.toString(), {
           ...prev,
           editNode: action.edit,
           inputNode: "",

@@ -62,15 +62,15 @@ type ACTIONTYPE =
   | { type: "unfocus node"; address: string[] }
   | { type: "unfocus all" }
   | { type: "refocus" }
-  | { type: "set display children"; display: boolean; node: Node }
+  | { type: "toggle display children"; }
   | { type: "set collapse all"; displayChildren: boolean }
-  | { type: "delete child"; node: Node; child: Node }
-  | { type: "edit name"; address: string[]; edit: boolean }
+  | { type: "delete"; }
+  | { type: "edit name"; edit: boolean }
   | { type: "set modal"; isOpen: boolean }
   | { type: "edit root name"; name: string }
   | { type: "input name"; input: string; address: string[] }
   | { type: "submit name"; node: Node }
-  | { type: "edit node"; address: string[]; edit: boolean }
+  | { type: "edit node"; edit: boolean }
   | { type: "input node"; input: string; address: string[] }
   | { type: "copy node" }
   | { type: "copy address"; address: string[] }

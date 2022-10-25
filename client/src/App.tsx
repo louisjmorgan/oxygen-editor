@@ -13,6 +13,7 @@ import { getUser } from "./Utils/auth";
 import ActionBar from "./Components/ActionBar/ActionBar";
 import { fetchTrees } from "./Model/Server";
 import { ThemeProvider, createTheme } from "@mui/material";
+import ToolMenu from "./Components/ToolMenu/ToolMenu";
 
 const { useState, useEffect, useReducer } = React;
 
@@ -53,7 +54,7 @@ function App() {
         action.type !== "edit name" &&
         action.type !== "edit node" &&
         action.type !== "input node" &&
-        action.type !== "set display children" &&
+        action.type !== "toggle display children" &&
         action.type !== "set collapse all" &&
         action.type !== "copy node" &&
         action.type !== "copy address" &&
@@ -143,9 +144,9 @@ function App() {
               }
               visible={true}
               dispatch={dispatch}
-              deleteFromParent={() => {}}
             />
             </Box>
+            <ToolMenu dispatch={dispatch} />
           </main>
         </>
       )}
