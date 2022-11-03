@@ -60,7 +60,7 @@ exports.user_register_post = [
 exports.user_login_post = [
   body("username", "username must not be empty.")
     .trim()
-    .isLength({ min: 5, max: 20 })
+    .isLength({ min: 1, max: 20 })
     .escape(),
   body("password", "Password must not be empty")
     .trim()
