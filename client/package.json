@@ -2,6 +2,7 @@
   "name": "oxygen-editor",
   "version": "0.1.0",
   "private": true,
+  "homepage": "/projects/oxygen-editor",
   "dependencies": {
     "@babel/core": "^7.16.0",
     "@emotion/react": "^11.10.4",
