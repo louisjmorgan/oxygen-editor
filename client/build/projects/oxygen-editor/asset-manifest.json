@@ -1,0 +1,14 @@
+{
+  "files": {
+    "main.css": "/projects/oxygen-editor/static/css/main.38e2207a.css",
+    "main.js": "/projects/oxygen-editor/static/js/main.043a18af.js",
+    "static/media/logo512.png": "/projects/oxygen-editor/static/media/logo512.88fcd961b9040cf136c0.png",
+    "index.html": "/projects/oxygen-editor/index.html",
+    "main.38e2207a.css.map": "/projects/oxygen-editor/static/css/main.38e2207a.css.map",
+    "main.043a18af.js.map": "/projects/oxygen-editor/static/js/main.043a18af.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.38e2207a.css",
+    "static/js/main.043a18af.js"
+  ]
+}

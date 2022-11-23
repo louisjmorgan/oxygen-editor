@@ -61,6 +61,7 @@ export default function RegisterModal({
   handleClose,
   dispatch,
 }: RegisterProps) {
+
   const content = {
     header: "Register",
     description: "You can save your trees and access them later.",

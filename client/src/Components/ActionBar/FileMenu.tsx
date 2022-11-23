@@ -4,6 +4,7 @@ import {
   ButtonGroup,
   Menu,
   MenuItem,
+  useMediaQuery,
 } from "@mui/material/";
 import { ACTIONTYPE, DialogType, State } from "src/Model/Types";
 import { deleteTree, updateTree } from "src/Model/Server";
@@ -20,6 +21,9 @@ type FileProps = {
 };
 
 export default function FileMenu({ dispatch, state }: FileProps) {
+
+  const shouldHideButtonText = useMediaQuery('(min-width:600px)');
+
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -173,7 +177,7 @@ export default function FileMenu({ dispatch, state }: FileProps) {
         sx={{ borderRadius: 0 }}
         startIcon={<InsertDriveFileIcon />}
       >
-        File
+        {shouldHideButtonText ? 'File' : '' }
       </Button>
       <Menu
         id="basic-menu"

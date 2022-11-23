@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Button, ButtonGroup, Menu, MenuItem } from "@mui/material/";
+import { Button, ButtonGroup, Menu, MenuItem, useMediaQuery } from "@mui/material/";
 import { ACTIONTYPE } from "src/Model/Types";
 import ShortcutsModal from "./ShortcutsModal";
 import KeyboardCommandKeyIcon from '@mui/icons-material/KeyboardCommandKey';
@@ -13,6 +13,9 @@ type CommandsProps = {
 };
 
 export default function CommandsMenu({ dispatch, collapsed }: CommandsProps) {
+
+  const shouldHideButtonText = useMediaQuery('(min-width:600px)');
+
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -64,7 +67,7 @@ export default function CommandsMenu({ dispatch, collapsed }: CommandsProps) {
         sx={{ borderRadius: 0 }}
         startIcon={<KeyboardCommandKeyIcon />}
       >
-        Commands
+        {shouldHideButtonText ? 'Commands' : ''}
       </Button>
       <Menu
         id="basic-menu"

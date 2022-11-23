@@ -16,7 +16,8 @@ const styles: { [key: string]: React.CSSProperties } = {
     textAlign: "left",
     transition: "0.3s ease-in",
     whiteSpace: 'nowrap',
-    cursor: 'pointer'
+    cursor: 'pointer',
+    WebkitTapHighlightColor: 'transparent',
   },
 
   flex: {
@@ -144,8 +145,9 @@ const Node = ({
             ref={ref}
             style={{
               ...styles.flex,
-              outline: focussed > -1 ? "solid white 1px" : "none",
-              color: isRoot ? "lightgreen" : "",
+              // outline: focussed > -1 ? "solid white 1px" : "none",
+              backgroundColor: focussed > -1 ? "white" : '',
+              color: isRoot ? "lightgreen" : focussed > - 1 ? 'black' : 'white',
             }}
           >
             <button
@@ -153,7 +155,7 @@ const Node = ({
               style={{
                 opacity: node.children.size > 0 ? 1 : 0,
                 ...styles.collapseChildren,
-                color: isRoot ? "lightgreen" : "white",
+                color: isRoot ? "lightgreen" : focussed > - 1 ? 'black' : 'white',
               }}
               tabIndex={-1}
             >

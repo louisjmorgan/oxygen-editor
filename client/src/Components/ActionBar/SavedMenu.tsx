@@ -77,7 +77,7 @@ export default function SavedMenu({ dispatch, fetched }: SavedProps) {
   };
 
   
-
+  console.log(fetched)
 
   return (
     <>

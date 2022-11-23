@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
-    "outDir": "build/dist",
+    "outDir": "build/projects/oxygen-editor",
     "module": "esnext",
     "target": "es2015",
     "lib": ["es6", "dom"],

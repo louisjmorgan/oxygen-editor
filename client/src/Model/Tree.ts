@@ -328,7 +328,7 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
         ...state,
         fetched: {
           ...state.fetched,
-         trees: action.trees
+         trees: action.trees || [],
         },
       }
     }

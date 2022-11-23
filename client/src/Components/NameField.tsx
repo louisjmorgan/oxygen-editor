@@ -19,7 +19,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   token: {
     display: "inline",
     width: '100%',
-    whiteSpace: 'nowrap'
+    whiteSpace: 'nowrap',
   },
 
   saveButton: {
