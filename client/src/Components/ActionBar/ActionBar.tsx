@@ -1,4 +1,4 @@
-import { Box, Button, ButtonGroup } from "@mui/material";
+import { Box, Button, ButtonGroup, useMediaQuery } from "@mui/material";
 import { ACTIONTYPE, State } from "src/Model/Types";
 import { logout } from "../../Utils/auth";
 import RegisterModal from "./RegisterModal";
@@ -36,6 +36,9 @@ type ActionBarProps = {
 };
 
 function ActionBar({ state, dispatch, collapseAll }: ActionBarProps) {
+
+  const shouldHideButtonText = useMediaQuery('(min-width:600px)');
+
   const [isOpenSignIn, setOpenSignIn] = React.useState(false);
   const handleOpenSignIn = () => {
     setOpenSignIn(true);
@@ -109,16 +112,16 @@ function ActionBar({ state, dispatch, collapseAll }: ActionBarProps) {
             <>
               <SavedMenu dispatch={dispatch} fetched={state.fetched} />
               <Button onClick={handleSignOut} startIcon={<LogoutIcon />}>
-                Sign out
+                {shouldHideButtonText ? 'Sign out' : ''}
               </Button>
             </>
           ) : (
             <>
               <Button onClick={handleOpenSignIn} startIcon={<LoginIcon />}>
-                Sign in
-              </Button>
+              {shouldHideButtonText ? 'Sign in' : ''}
+              </Button>'
               <Button onClick={handleOpenRegister} startIcon={<HowToRegIcon />}>
-                Register
+              {shouldHideButtonText ?  'Register' : '' }
               </Button>
             </>
           )}
