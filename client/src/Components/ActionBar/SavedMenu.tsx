@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Button, Menu, MenuItem } from "@mui/material/";
 import { ACTIONTYPE, DialogType } from "src/Model/Types";
-import AccountTreeIcon from '@mui/icons-material/AccountTree';
+import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import AlertDialog from "./AlertDialog";
 
 type Tree = {
@@ -16,9 +16,9 @@ type Tree = {
 type SavedProps = {
   dispatch: (action: ACTIONTYPE) => void;
   fetched: {
-    current: number,
-    trees: Tree[],
-  },
+    current: number;
+    trees: Tree[];
+  };
 };
 
 export default function SavedMenu({ dispatch, fetched }: SavedProps) {
@@ -36,48 +36,45 @@ export default function SavedMenu({ dispatch, fetched }: SavedProps) {
   const [dialog, setDialog] = React.useState<DialogType>({
     isOpen: false,
     content: {
-      title: '',
-      text: '',
-      buttonTrue: '',
-      buttonFalse: ''
+      title: "",
+      text: "",
+      buttonTrue: "",
+      buttonFalse: "",
     },
     action: (shouldAct: boolean) => null,
-  })
+  });
 
-  function handleCloseDialog () {
+  function handleCloseDialog() {
     setDialog((prev: DialogType) => ({
       ...prev,
       isOpen: false,
-    }))
+    }));
   }
-  
+
   const handleLoadTree = (tree: Tree, index: number) => {
-    if (index !== fetched.current) {   
+    if (index !== fetched.current) {
       setDialog(() => ({
-          isOpen: true,
-          content: {
-            title: 'Switch Tree',
-            text: 'Are you sure you want to switch tree? Unsaved progress on current tree will be lost.',
-            buttonTrue: 'Switch',
-            buttonFalse: 'Cancel',
-          },
-          action: (shouldAct: boolean) => {
-            if (shouldAct) {
-              dispatch({
-                type: "load tree",
-                tree: tree,
-                index: index,
-              });
-            }
-            return null;
+        isOpen: true,
+        content: {
+          title: "Switch Tree",
+          text: "Are you sure you want to switch tree? Unsaved progress on current tree will be lost.",
+          buttonTrue: "Switch",
+          buttonFalse: "Cancel",
+        },
+        action: (shouldAct: boolean) => {
+          if (shouldAct) {
+            dispatch({
+              type: "load tree",
+              tree: tree,
+              index: index,
+            });
           }
-        }))
-    } 
+          return null;
+        },
+      }));
+    }
     handleClose();
   };
-
-  
-  console.log(fetched)
 
   return (
     <>
@@ -89,7 +86,9 @@ export default function SavedMenu({ dispatch, fetched }: SavedProps) {
         sx={{ borderRadius: 0 }}
         startIcon={<AccountTreeIcon />}
       >
-        {fetched.current !== -1 ? fetched.trees[fetched.current].title : 'My Trees'}
+        {fetched.current !== -1
+          ? fetched.trees[fetched.current].title
+          : <i>(unsaved tree)</i>}
       </Button>
       <Menu
         id="basic-menu"
@@ -101,6 +100,12 @@ export default function SavedMenu({ dispatch, fetched }: SavedProps) {
         }}
         disableScrollLock
       >
+        {fetched.current === -1 ? 
+          <MenuItem key="local">
+            <i>{"(unsaved tree)"}</i>
+          </MenuItem>
+          : ''
+        }
         {fetched.trees.map((tree, index) => (
           <MenuItem key={tree.id} onClick={() => handleLoadTree(tree, index)}>
             {tree.title}

@@ -19,7 +19,7 @@ if (pressedKeys[0]) {
       case shortcuts.cancel: {
         dispatch({
           type: "edit name",
-          edit: false,
+          isEditing: false,
         });
         return;
       }
@@ -39,30 +39,23 @@ if (pressedKeys[0]) {
         if (!input) {
           dispatch({
             type: "edit node",
-            edit: false,
+            isEditing: false,
           });
           return;
         }
-        if (input.insertTarget === "sibling") {
-          dispatch({
-            type: "paste sibling",
-            nodeString: input.inputNode,
-            node: node,
-          });
-        } else if (input.insertTarget === "child") {
-          dispatch({
-            type: "paste child",
-            nodeString: input.inputNode,
-            address: node.address,
-          });
-        }
+        dispatch({
+          type: "paste node",
+          nodeString: input.inputNode,
+          node: node,
+          target: input.insertTarget,
+        });
         return;
       }
 
       case shortcuts.cancel: {
         dispatch({
           type: "edit node",
-          edit: false,
+          isEditing: false,
         });
         return;
       }
@@ -253,7 +246,7 @@ if (pressedKeys[0]) {
         if (state.focus[0].toString() === "root") return;
         const node = getNodeFromTree(state.focus[0], state.tree);
         const parentAddress = getParentAddress(state.focus[0])
-        if (parentAddress.toString() === "root") return;
+        if (parentAddress.toString() === "root" && node.index === 0) return;
         const parent = getNodeFromTree(
           parentAddress,
           state.tree
@@ -317,6 +310,7 @@ if (pressedKeys[0]) {
       case shortcuts.showHide: {
         dispatch({
           type: "toggle display children",
+          addresses: state.focus,
         });
         return;
       }
@@ -346,7 +340,7 @@ if (pressedKeys[0]) {
       case shortcuts.editNode: {
         dispatch({
           type: "edit name",
-          edit: true,
+          isEditing: true,
         });
         return;
       }
@@ -354,7 +348,7 @@ if (pressedKeys[0]) {
       case shortcuts.newNode: {
         dispatch({
           type: "edit node",
-          edit: true,
+          isEditing: true,
         });
         return;
       }

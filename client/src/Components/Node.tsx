@@ -80,6 +80,7 @@ const Node = ({
   const toggleDisplayChildren = () => {
     dispatch({
       type: "toggle display children",
+      addresses: [node.address],
     });
   };
 
@@ -94,14 +95,15 @@ const Node = ({
     if (!input) {
       dispatch({
         type: "edit node",
-        edit: false,
+        isEditing: false,
       });
       return;
     }
     dispatch({
-      type: "paste sibling",
+      type: "paste node",
       nodeString: input,
       node: node,
+      target: "sibling",
     });
   };
 
@@ -109,14 +111,15 @@ const Node = ({
     if (!input) {
       dispatch({
         type: "edit node",
-        edit: false,
+        isEditing: false,
       });
       return;
     }
     dispatch({
-      type: "paste child",
+      type: "paste node",
       nodeString: input,
-      address: node.address,
+      node: node,
+      target: "child"
     });
   };
   const childNodes = [...node.children].map(

@@ -1,15 +1,16 @@
 import { Button, Input } from "@mui/material";
 import * as React from "react";
+import SaveIcon from "@mui/icons-material/Save";
+import CancelIcon from "@mui/icons-material/Cancel";
 import { ACTIONTYPE, AddressMapItem, Node as NodeType } from "../Model/Types";
-
 
 const styles: { [key: string]: React.CSSProperties } = {
   insertNode: {
     marginTop: "0.5em",
-    background: 'rgba(0, 0, 0, 0)',
-    border: 'none',
-    outline: 'none',
-    color: 'white',
+    background: "rgba(0, 0, 0, 0)",
+    border: "none",
+    outline: "none",
+    color: "white",
     fontFamily: `"DejaVu Mono", monospace`,
   },
 
@@ -32,51 +33,74 @@ const styles: { [key: string]: React.CSSProperties } = {
 };
 
 type InsertNodeProps = {
-  node: NodeType,
-  dispatch: (action: ACTIONTYPE) => void,
-  addressMap: AddressMapItem,
-  submitInsertChild: (input: string) => void,
-  submitInsertSibling: (input: string) => void,
-}
+  node: NodeType;
+  dispatch: (action: ACTIONTYPE) => void;
+  addressMap: AddressMapItem;
+  submitInsertChild: (input: string) => void;
+  submitInsertSibling: (input: string) => void;
+};
 
-const InsertNodeField = ({ node, dispatch, addressMap, submitInsertChild, submitInsertSibling }: InsertNodeProps) => {
+const InsertNodeField = ({
+  node,
+  dispatch,
+  addressMap,
+  submitInsertChild,
+  submitInsertSibling,
+}: InsertNodeProps) => {
+  const handleSubmit = () => {
+    if (addressMap.insertTarget === "child")
+      submitInsertChild(addressMap.inputNode);
+    if (addressMap.insertTarget === "sibling")
+      submitInsertSibling(addressMap.inputNode);
+  };
 
-  const handleSubmit = () =>{
-    if (addressMap.insertTarget === "child") submitInsertChild(addressMap.inputNode);
-    if (addressMap.insertTarget === "sibling") submitInsertSibling(addressMap.inputNode);
-  } 
+  const handleCancel = () => {
+    dispatch({
+      type: "edit node",
+      isEditing: false,
+    });
+  };
 
   const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     dispatch({
       type: "input node",
       address: node.address,
       input: event.target.value,
-    })
+    });
   };
 
-  return <>
-  {addressMap.editNode && (
-    <div>
-      <Input
-        autoFocus
-        style={{
-          marginLeft: addressMap.insertTarget === "child" ? "5em": "2rem" ,...styles.insertNode
-        }}
-        value={addressMap.inputNode}
-        onChange={handleInput}
-        disableUnderline
-      />
-      <Button
-          onClick={handleSubmit}
-          style={{
-            ...styles.saveButton,
-          }}
-        >
-        💾
-      </Button>
-    </div>
-  )}
-  </>
+  return (
+    <>
+      {addressMap.editNode && (
+        <div>
+          <Input
+            autoFocus
+            style={{
+              marginLeft: addressMap.insertTarget === "child" ? "5em" : "2rem",
+              ...styles.insertNode,
+            }}
+            value={addressMap.inputNode}
+            onChange={handleInput}
+            disableUnderline
+          />
+          <Button
+            onClick={handleSubmit}
+            style={{
+              ...styles.saveButton,
+            }}
+            startIcon={<SaveIcon />}
+          />
+          <Button
+            onClick={handleCancel}
+            style={{
+              ...styles.saveButton,
+            }}
+            startIcon={<CancelIcon />}
+          />
+        </div>
+      )}
+    </>
+  );
 };
 
 export default InsertNodeField;

@@ -24,7 +24,7 @@ function countRepeatedCharacter(line: string, character: string) {
   return x;
 }
 
-function parseTokens(code: string) {
+function parseTokens(code: string): Token[] {
   const lines = code.split("\n");
   const tokens: Token[] = [];
   lines.forEach((line, index) => {
@@ -43,7 +43,7 @@ function parseRecursive(
   tokens: Token[],
   address: string[],
   index: number
-) {
+): Node {
   const node = createNode(superToken.value);
   node.address = [...address, superToken.value];
   let orderIndex = 0;
@@ -61,22 +61,25 @@ function parseRecursive(
   return node;
 }
 
-function parseNodes(code: string, rootName: string = "root") {
+function parseNodes(tokens: Token[], rootName: string = "root") {
   const nodes = new Map()
-  const tokens = parseTokens(code);
+  let orderIndex = 0
   tokens.forEach((token, index) => {
-    if (token.x === 0) {
-      const node = parseRecursive(token, tokens, ['root'], index + 1);
-      node.address = ['root', token.value];
+    if (token.x === 1) {
+      const node = parseRecursive(token, tokens, [rootName], index + 1);
+      node.address = [rootName, token.value];
+      node.index = orderIndex;
+      orderIndex++
       nodes.set(token.value, node);
     }
   });
   return nodes;
 }
 
-function parseRoot(code: string, rootName: string = 'root') {
-  const nodes = createNode(rootName, ['root']);
-  nodes.children = parseNodes(code)
+function parseRoot(code: string, rootName: string = 'root'): Node {
+  const tokens = parseTokens(code)
+  const nodes = createNode(tokens[0].value, [rootName])
+  nodes.children = parseNodes(tokens, rootName)
   return nodes;
 }
 
@@ -250,7 +253,7 @@ function initializeState(code: string): State {
     clipboard: "",
     user: '',
     fetched: {
-      current: -1,
+      current: -1 ,
       trees: []
     },
     errorDialog: {
@@ -308,7 +311,7 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
     }
 
     case "load tree": {
-      const tree = parseRoot(action.tree.content, action.tree.title);
+      const tree = parseRoot(action.tree.content);
       const addressMap = createAddressMap(tree, new Map())
       const [[firstChild]] = [...tree.children]
       return {
@@ -395,16 +398,37 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
     }
 
     case "unfocus all": {
+      const address = state.focus[0]
+      if (address.toString() === "root") return state;
+      const newAddressMap = new Map(state.addressMap);
+      const prev = state.addressMap.get(address.toString());
+      if (prev) {
+        newAddressMap.set(address.toString(), {
+          ...prev,
+          editName: false,
+          editNode: false,
+          inputNode: "",
+          inputName: "",
+        });
+      }
+
       return {
         ...state,
         focus: [],
+        addressMap: newAddressMap,
+        editing: {
+          ...state.editing,
+          name: false,
+          node: false,
+        },
       };
     }
 
     case "toggle display children": {
       let newAddressMap = new Map(state.addressMap);
       let collapsed = false;
-      state.focus.forEach((address) => {    
+
+      action.addresses.forEach((address) => {    
         const node = getNodeFromTree(address, state.tree);
         const isDisplay = !state.addressMap.get(address.toString())?.display;
 
@@ -423,9 +447,8 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
         if (node.address.toString() === "root") collapsed = true;
       
       })
-      
 
-     
+      
       return {
         ...state,
         collapsed: collapsed,
@@ -495,7 +518,7 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
       if (prev) {
         newAddressMap.set(address.toString(), {
           ...prev,
-          editName: action.edit,
+          editName: action.isEditing,
         });
       }
 
@@ -504,7 +527,7 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
         addressMap: newAddressMap,
         editing: {
           ...state.editing,
-          name: action.edit,
+          name: action.isEditing,
         },
       };
     }
@@ -599,7 +622,7 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
       if (prev) {
         newAddressMap.set(address.toString(), {
           ...prev,
-          editNode: action.edit,
+          editNode: action.isEditing,
           inputNode: "",
         });
       }
@@ -609,7 +632,7 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
         addressMap: newAddressMap,
         editing: {
           ...state.editing,
-          node: action.edit,
+          node: action.isEditing,
         },
       };
     }
@@ -673,13 +696,12 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
       };
     }
 
-    case "paste sibling": {
+    case "paste node": {
       if (!action.nodeString) return state;
-      const parsedNodes = parseRoot(`${action.nodeString}`)
-        .children.values()
-        .next().value;
+      const tokens = parseTokens(action.nodeString);
+      const parsedNodes = parseRoot(action.nodeString, tokens[0].value)
       const search = [...action.node.address];
-      search.pop();
+      if (action.target === "sibling") search.pop();
       search.push(parsedNodes.name);
 
       const newNode = updateAddresses(parsedNodes, search);
@@ -721,58 +743,64 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
       };
     }
 
-    case "paste child": {
-      if (!action.nodeString) return state;
-      const parsedNodes = parseRoot(`${action.nodeString}`).children;
-      let newTree = state.tree;
-      let search: string[] = []
-      parsedNodes.forEach((sibling) => {
-        search = [...action.address];
-        search.push(sibling.name);
-        const newNode = updateAddresses(sibling, search);
-        newTree = updateNodeInTree(newTree, newNode, search);
-      });
+    // case "paste child": {
+    //   if (!action.nodeString) return state;
+    //   const tokens = parseTokens(action.nodeString);
+    //   const parsedNodes = parseRoot(action.nodeString, tokens[0].value);
 
-      const prev = state.addressMap.get(action.address.toString());
-      if (prev) {
-        state.addressMap.set(action.address.toString(), {
-          ...prev,
-          editNode: false,
-        });
-      }
+    //   const search = [...action.address];
+    //   search.push(parsedNodes.name);
 
-      const newAddressMap = createAddressMap(newTree, new Map());
-      newAddressMap.forEach((value, address) => {
-        const prev = state.addressMap.get(address);
-        if (prev)
-          newAddressMap.set(address, {
-            ...prev,
-            inputNode: "",
-            insertTarget: "sibling",
-          });
-      });
+    //    const newNode = updateAddresses(parsedNodes, search);
+    //   console.log(newNode)
+    //   const newTree = updateNodeInTree(
+    //     state.tree,
+    //     newNode,
+    //     search,
+    //     action.node.index + 1
+    //   );
 
-      if (prev?.display === false) {
-        const prev = state.addressMap.get(action.address.toString());
-        if (prev) {
-          newAddressMap.set(action.address.toString(), {
-            ...prev,
-            display: true,
-          });
-        }
-      }
+    //   console.log(newTree)
+    //   const prev = state.addressMap.get(action.node.address.toString());
+    //   if (prev) {
+    //     state.addressMap.set(action.node.address.toString(), {
+    //       ...prev,
+    //       editNode: false,
+    //     });
+    //   }
 
-      return {
-        ...state,
-        focus: [search],
-        editing: {
-          ...state.editing,
-          node: false,
-        },
-        addressMap: newAddressMap,
-        tree: newTree,
-      };
-    }
+    //   const newAddressMap = createAddressMap(newTree, new Map());
+    //   newAddressMap.forEach((value, address) => {
+    //     const prev = state.addressMap.get(address);
+    //     if (prev)
+    //       newAddressMap.set(address, {
+    //         ...prev,
+    //         inputNode: "",
+    //         editNode: false,
+    //       });
+    //   });
+
+    //   if (prev?.display === false) {
+    //     const prev = state.addressMap.get(action.address.toString());
+    //     if (prev) {
+    //       newAddressMap.set(action.address.toString(), {
+    //         ...prev,
+    //         display: true,
+    //       });
+    //     }
+    //   }
+
+    //   return {
+    //     ...state,
+    //     focus: [search],
+    //     editing: {
+    //       ...state.editing,
+    //       node: false,
+    //     },
+    //     addressMap: newAddressMap,
+    //     tree: newTree,
+    //   };
+    // }
 
     case "shift sibling": {
       const parent = getNodeFromTree(

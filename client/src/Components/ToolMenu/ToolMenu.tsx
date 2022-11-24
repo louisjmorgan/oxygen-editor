@@ -14,37 +14,37 @@ const buttons = [
     title: "Insert Node",
     icon: <AddIcon />,
     key: "newNode",
-    action: "edit node",
+    action: { type: "edit node", isEditing: true},
   },
   {
     title: "Edit Name",
     icon: <EditIcon />,
     key: "editNode",
-    action: "edit name",
+    action: { type: "edit name", isEditing: true},
   },
   {
     title: "Delete",
     icon: <BackspaceIcon />,
     key: "delete",
-    action: "delete",
+    action: { type: "delete" },
   },
   {
     title: "Copy Address",
     icon: <AlternateEmailIcon />,
     key: "copyAddress",
-    action: "copy address",
+    action: { type: "copy address" },
   },
   {
     title: "Copy Node",
     icon: <ContentCopyIcon />,
     key: "copyNode",
-    action: "copy node",
+    action: {type: "copy node"},
   },
   {
     title: "Paste Node",
     icon: <ContentPasteGoIcon />,
     key: "paste",
-    acion: "paste node",
+    action: {type: "paste node"},
   },
 ];
 
@@ -55,16 +55,14 @@ type ToolMenuProps = {
 function ToolMenu({ dispatch }: ToolMenuProps) {
   const [isShowTools, setShowTools] = React.useState(false);
 
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if ((typeof e.currentTarget.id) === ACTIONTYPE) {
-      dispatch({
-        type: e.currentTarget.id, 
-      });
+  const handleClick = (action: ACTIONTYPE) => {
+      dispatch(action);
     }
-  };
+    
   const toggleTools = () => {
     setShowTools((prev) => !prev);
   };
+
   return (
     <Box
       sx={{
@@ -85,7 +83,7 @@ function ToolMenu({ dispatch }: ToolMenuProps) {
               placement="left"
               key={button.key}
             >
-              <Fab id={button.action} onClick={handleClick}>
+              <Fab onClick={() => handleClick(button.action as ACTIONTYPE)}>
                 {button.icon}
               </Fab>
             </Tooltip>

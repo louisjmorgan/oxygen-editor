@@ -31,6 +31,7 @@ type LoadedTree = {
   updatedAt: string;
 };
 
+
 type State = {
   tree: Node;
   user: string;
@@ -62,15 +63,15 @@ type ACTIONTYPE =
   | { type: "unfocus node"; address: string[] }
   | { type: "unfocus all" }
   | { type: "refocus" }
-  | { type: "toggle display children"; }
+  | { type: "toggle display children"; addresses: string[][] }
   | { type: "set collapse all"; displayChildren: boolean }
   | { type: "delete"; }
-  | { type: "edit name"; edit: boolean }
+  | { type: "edit name"; isEditing: boolean }
   | { type: "set modal"; isOpen: boolean }
   | { type: "edit root name"; name: string }
   | { type: "input name"; input: string; address: string[] }
   | { type: "submit name"; node: Node }
-  | { type: "edit node"; edit: boolean }
+  | { type: "edit node"; isEditing: boolean }
   | { type: "input node"; input: string; address: string[] }
   | { type: "copy node" }
   | { type: "copy address"; address: string[] }
@@ -79,7 +80,7 @@ type ACTIONTYPE =
       address: string[];
       target: "sibling" | "child";
     }
-  | { type: "paste sibling"; nodeString: string; node: Node }
+  | { type: "paste node"; nodeString: string; node: Node, target: "sibling" | "child"; }
   | { type: "paste child"; nodeString: string; address: string[] }
   | { type: "shift sibling"; node: Node }
   | { type: "shift order"; node: Node; direction: 1 | -1 }
