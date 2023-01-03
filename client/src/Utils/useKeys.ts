@@ -50,6 +50,7 @@ const useKeys = (state: State) => {
       }
       // && !pressedKeys.includes(key)
       if (ALLOWED_KEYS.includes(key)) {
+        if (!state.editing) e.preventDefault()
         setPressedKeys((previousPressedKeys) => [...previousPressedKeys, key]);
       }
     };
