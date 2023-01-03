@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Button, Menu, MenuItem } from "@mui/material/";
+import { Button, Menu, MenuItem, Typography } from "@mui/material/";
 import { ACTIONTYPE, DialogType } from "src/Model/Types";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import AlertDialog from "./AlertDialog";
@@ -86,9 +86,11 @@ export default function SavedMenu({ dispatch, fetched }: SavedProps) {
         sx={{ borderRadius: 0 }}
         startIcon={<AccountTreeIcon />}
       >
+        <Typography sx={{display: {xs: 'none', sm: 'block'}}}>
         {fetched.current !== -1
           ? fetched.trees[fetched.current].title
           : <i>(unsaved tree)</i>}
+        </Typography>
       </Button>
       <Menu
         id="basic-menu"
@@ -102,13 +104,16 @@ export default function SavedMenu({ dispatch, fetched }: SavedProps) {
       >
         {fetched.current === -1 ? 
           <MenuItem key="local">
-            <i>{"(unsaved tree)"}</i>
+            <b>{"(unsaved tree)"}</b>
           </MenuItem>
           : ''
         }
         {fetched.trees.map((tree, index) => (
           <MenuItem key={tree.id} onClick={() => handleLoadTree(tree, index)}>
-            {tree.title}
+             {fetched.current === index
+          ? <b>{tree.title}</b>
+          : tree.title}
+            
           </MenuItem>
         ))}
       </Menu>

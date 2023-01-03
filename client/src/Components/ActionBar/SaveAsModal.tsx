@@ -110,6 +110,7 @@ function SaveAsModal({ open, handleClose, state, dispatch }: SaveAsProps) {
                           <Input
                             id="name"
                             aria-describedby="name-helper-text"
+                            required
                           />
                           <FormHelperText id="name-helper-text"></FormHelperText>
                         </FormControl>

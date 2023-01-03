@@ -26,6 +26,8 @@ async function saveNewTree(name: string, tree: Node) {
     content: `${nodeToString(newRoot)}`
   };
 
+  console.log(nodeToString(newRoot))
+
   const saveResponse = await fetch(`${api}/trees`, {
     method: "POST",
     headers: {

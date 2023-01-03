@@ -25,7 +25,7 @@ const theme = createTheme({
   },
 });
 
-const code = "root\n\tsibling1\n\t\tchild1\n\t\tchild2\n\tsibling2\n\t\tchild1\n\t\tchild2"
+const code = "sibling1\n\tchild1\n\tchild2\nsibling2\n\tchild1\n\tchild2"
 
 function App() {
   // initialize state handlers
@@ -106,8 +106,6 @@ function App() {
     });
     setCollapse(!collapsed);
   }
-
-  // console.log(state.tree)
 
   function findFocusIndex(address: string[]) {
     let index = -1;

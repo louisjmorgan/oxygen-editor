@@ -106,7 +106,7 @@ function ActionBar({ state, dispatch, collapseAll }: ActionBarProps) {
           <FileMenu dispatch={dispatch} state={state} />
            <CommandsMenu dispatch={dispatch} collapsed={state.collapsed} />
         </Box>
-        <img style={{padding: '0.5rem'}} src={Logo} alt="logo"/>
+        <Box component="img" sx={{ display: { xs: 'none', sm: 'block' }, padding: '0.5rem' }} src={Logo} alt="logo" />
         <Box>
           {state.user ? (
             <>

@@ -61,11 +61,11 @@ function parseRecursive(
   return node;
 }
 
-function parseNodes(tokens: Token[], rootName: string = "root") {
+function parseNodes(tokens: Token[], rootName: string = "root", depth: number = 0) {
   const nodes = new Map()
   let orderIndex = 0
   tokens.forEach((token, index) => {
-    if (token.x === 1) {
+    if (token.x === depth) {
       const node = parseRecursive(token, tokens, [rootName], index + 1);
       node.address = [rootName, token.value];
       node.index = orderIndex;
@@ -78,15 +78,15 @@ function parseNodes(tokens: Token[], rootName: string = "root") {
 
 function parseRoot(code: string, rootName: string = 'root'): Node {
   const tokens = parseTokens(code)
-  const nodes = createNode(tokens[0].value, [rootName])
-  nodes.children = parseNodes(tokens, rootName)
+  const nodes = createNode(rootName, ['root'])
+  if (tokens.length !== 1) nodes.children = parseNodes(tokens, 'root')
   return nodes;
 }
 
 function nodeToString(node: Node, depth = 0, output = "") {
   const tab = "\t";
   const indent = tab.repeat(depth);
-  if (depth !== 0) output += "\n";
+  output += "\n";
   let newDepth = depth
   if (node.address.toString() !== 'root') {
     newDepth = depth + 1
@@ -237,7 +237,7 @@ function createAddressMap(node: Node, map: AddressMap, previous?: AddressMap) {
 }
 
 function initializeState(code: string): State {
-  const tree = parseRoot(code);
+  const tree = parseRoot(code)
   const addressMap = createAddressMap(tree, new Map());
   const [[firstChild]] = [...tree.children]
   const state = {
@@ -311,7 +311,7 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
     }
 
     case "load tree": {
-      const tree = parseRoot(action.tree.content);
+      const tree = parseRoot(action.tree.content, action.tree.title)
       const addressMap = createAddressMap(tree, new Map())
       const [[firstChild]] = [...tree.children]
       return {
@@ -330,8 +330,8 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
       return {
         ...state,
         fetched: {
-          ...state.fetched,
-         trees: action.trees || [],
+          current: action.trees.length === 0 ? -1 : 0,
+          trees: action.trees || [],
         },
       }
     }
@@ -467,9 +467,10 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
           });
         }
       });
+      const [[firstChild]] = [...state.tree.children]
       return {
         ...state,
-        focus: [["root"]],
+        focus: [["root", firstChild]],
         collapsed: !state.collapsed,
         addressMap: newAddressMap,
       };
@@ -698,19 +699,27 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
 
     case "paste node": {
       if (!action.nodeString) return state;
+      const parent = getNodeFromTree(
+        action.target === "sibling" ? getParentAddress(action.node.address) : action.node.address,
+        state.tree
+      );
       const tokens = parseTokens(action.nodeString);
-      const parsedNodes = parseRoot(action.nodeString, tokens[0].value)
-      const search = [...action.node.address];
-      if (action.target === "sibling") search.pop();
-      search.push(parsedNodes.name);
+      const parsedNodes = parseNodes(tokens, parent.name, 0)
+      
+      const search = [...parent.address];
+      parsedNodes.forEach((node, name) => {
+      
+        parent.children.set(name, node)
+      })
 
-      const newNode = updateAddresses(parsedNodes, search);
+      const newNode = updateAddresses(parent, parent.address)
       const newTree = updateNodeInTree(
         state.tree,
         newNode,
-        search,
-        action.node.index + 1
+        parent.address,
+        parent.index,
       );
+      
 
       const prev = state.addressMap.get(action.node.address.toString());
       if (prev) {
@@ -733,7 +742,7 @@ function treeReducer(state: State, action: ACTIONTYPE): State {
 
       return {
         ...state,
-        focus: [search],
+        focus: [[...search, tokens[0].value]],
         editing: {
           ...state.editing,
           node: false,

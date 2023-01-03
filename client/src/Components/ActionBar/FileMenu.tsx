@@ -14,6 +14,7 @@ import SaveAsIcon from "@mui/icons-material/SaveAs";
 import SaveIcon from "@mui/icons-material/Save";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AlertDialog from "./AlertDialog";
+import defaultTree from "src/Utils/defaultTree";
 
 type FileProps = {
   dispatch: (action: ACTIONTYPE) => void;
@@ -123,7 +124,7 @@ export default function FileMenu({ dispatch, state }: FileProps) {
                 console.log(res);
                 dispatch({
                   type: "load tree",
-                  tree: res.fetched[state.fetched.current - 1],
+                  tree: res.fetched[state.fetched.current - 1] || {title: '(unsaved tree)', content: defaultTree},
                   index: state.fetched.current - 1,
                 });
                 dispatch({
