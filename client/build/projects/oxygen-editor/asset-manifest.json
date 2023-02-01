@@ -7,8 +7,5 @@
     "main.38e2207a.css.map": "/projects/oxygen-editor/static/css/main.38e2207a.css.map",
     "main.996c44d4.js.map": "/projects/oxygen-editor/static/js/main.996c44d4.js.map"
   },
-  "entrypoints": [
-    "static/css/main.38e2207a.css",
-    "static/js/main.996c44d4.js"
-  ]
+  "entrypoints": ["static/css/main.38e2207a.css", "static/js/main.996c44d4.js"]
 }

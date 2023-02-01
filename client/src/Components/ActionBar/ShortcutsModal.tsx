@@ -1,19 +1,26 @@
-import * as React from 'react'
-import { Modal, Box, Typography, TableBody, TableRow, TableCell }from '@mui/material';
-import shortcuts from '../../Utils/shortcuts';
+import * as React from "react";
+import {
+  Modal,
+  Box,
+  Typography,
+  TableBody,
+  TableRow,
+  TableCell,
+} from "@mui/material";
+import shortcuts from "../../Utils/shortcuts";
 
 const style = {
-  position: 'absolute' as 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
+  position: "absolute" as "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
   width: 400,
-  bgcolor: 'background.paper',
-  border: '2px solid #000',
+  bgcolor: "background.paper",
+  border: "2px solid #000",
   boxShadow: 24,
   p: 4,
   maxHeight: "80vh",
-  overflowY: 'auto',
+  overflowY: "auto",
 };
 
 const shortcutsDict = {
@@ -107,13 +114,12 @@ const shortcutsDict = {
   ],
 };
 
-
 type ShortcutsProps = {
-  open: boolean,
-  handleClose: () => void
-}
+  open: boolean;
+  handleClose: () => void;
+};
 
-function ShortcutsModal({open, handleClose}: ShortcutsProps) {
+function ShortcutsModal({ open, handleClose }: ShortcutsProps) {
   return (
     <Modal
       open={open}
@@ -121,57 +127,78 @@ function ShortcutsModal({open, handleClose}: ShortcutsProps) {
       aria-labelledby="modal-modal-title"
       aria-describedby="modal-modal-description"
     >
-    <Box sx={style}>
-      <Typography id="modal-modal-title" variant="h6" component="h2" fontWeight="bold">
-        Keyboard Shortcuts
-      </Typography>
-      <Typography id="modal-modal-description" sx={{ mt: 2 }} fontWeight="bold">
-        Global:
-      </Typography>
-      <TableBody>
-        {shortcutsDict.global.map((shortcut) => (
-          <TableRow key={shortcut.key}>
-            <TableCell>{shortcut.description}</TableCell>
-            <TableCell>{shortcuts[shortcut.key]}</TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-      <Typography id="modal-modal-description" sx={{ mt: 2 }} fontWeight="bold">
-        Moving nodes:
-      </Typography>
-      <TableBody>
-        {shortcutsDict.moving.map((shortcut) => (
-          <TableRow key={shortcut.key}>
-            <TableCell>{shortcut.description}</TableCell>
-            <TableCell>{shortcuts[shortcut.key]}</TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-      <Typography id="modal-modal-description" sx={{ mt: 2 }} fontWeight="bold">
-        UI:
-      </Typography>
-      <TableBody>
-        {shortcutsDict.ui.map((shortcut) => (
-          <TableRow key={shortcut.key}>
-            <TableCell>{shortcut.description}</TableCell>
-            <TableCell>{shortcuts[shortcut.key]}</TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-      <Typography id="modal-modal-description" sx={{ mt: 2 }} fontWeight="bold">
-        Editing tree:
-      </Typography>
-      <TableBody>
-        {shortcutsDict.editing.map((shortcut) => (
-          <TableRow key={shortcut.key}>
-            <TableCell>{shortcut.description}</TableCell>
-            <TableCell>{shortcuts[shortcut.key]}</TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Box>
-  </Modal>
-  )
+      <Box sx={style}>
+        <Typography
+          id="modal-modal-title"
+          variant="h6"
+          component="h2"
+          fontWeight="bold"
+        >
+          Keyboard Shortcuts
+        </Typography>
+        <Typography
+          id="modal-modal-description"
+          sx={{ mt: 2 }}
+          fontWeight="bold"
+        >
+          Global:
+        </Typography>
+        <TableBody>
+          {shortcutsDict.global.map((shortcut) => (
+            <TableRow key={shortcut.key}>
+              <TableCell>{shortcut.description}</TableCell>
+              <TableCell>{shortcuts[shortcut.key]}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+        <Typography
+          id="modal-modal-description"
+          sx={{ mt: 2 }}
+          fontWeight="bold"
+        >
+          Moving nodes:
+        </Typography>
+        <TableBody>
+          {shortcutsDict.moving.map((shortcut) => (
+            <TableRow key={shortcut.key}>
+              <TableCell>{shortcut.description}</TableCell>
+              <TableCell>{shortcuts[shortcut.key]}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+        <Typography
+          id="modal-modal-description"
+          sx={{ mt: 2 }}
+          fontWeight="bold"
+        >
+          UI:
+        </Typography>
+        <TableBody>
+          {shortcutsDict.ui.map((shortcut) => (
+            <TableRow key={shortcut.key}>
+              <TableCell>{shortcut.description}</TableCell>
+              <TableCell>{shortcuts[shortcut.key]}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+        <Typography
+          id="modal-modal-description"
+          sx={{ mt: 2 }}
+          fontWeight="bold"
+        >
+          Editing tree:
+        </Typography>
+        <TableBody>
+          {shortcutsDict.editing.map((shortcut) => (
+            <TableRow key={shortcut.key}>
+              <TableCell>{shortcut.description}</TableCell>
+              <TableCell>{shortcuts[shortcut.key]}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Box>
+    </Modal>
+  );
 }
 
-export default ShortcutsModal
+export default ShortcutsModal;

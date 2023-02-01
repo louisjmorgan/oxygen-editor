@@ -1,6 +1,6 @@
 import { Button, Input } from "@mui/material";
-import SaveIcon from '@mui/icons-material/Save';
-import CancelIcon from '@mui/icons-material/Cancel';
+import SaveIcon from "@mui/icons-material/Save";
+import CancelIcon from "@mui/icons-material/Cancel";
 import * as React from "react";
 import { ACTIONTYPE, Node as NodeType } from "../Model/Types";
 const { useState, useEffect } = React;
@@ -9,7 +9,6 @@ const styles: { [key: string]: React.CSSProperties } = {
   nameField: {
     position: "relative",
     display: "flex",
-    
   },
   input: {
     background: "rgba(0, 0, 0, 0)",
@@ -20,8 +19,8 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   token: {
     display: "inline",
-    width: '100%',
-    whiteSpace: 'nowrap',
+    width: "100%",
+    whiteSpace: "nowrap",
   },
 
   saveButton: {
@@ -44,12 +43,7 @@ type NameFieldProps = {
   submitInsertChild: (input: string) => void;
 };
 
-const NameField = ({
-  node,
-  dispatch,
-  edit,
-  submitEdit,
-}: NameFieldProps) => {
+const NameField = ({ node, dispatch, edit, submitEdit }: NameFieldProps) => {
   const [input, setInput] = useState(node.name);
 
   useEffect(() => {
@@ -90,35 +84,39 @@ const NameField = ({
     });
   };
 
-  return <div style={styles.nameField}>
-    {edit ? (
-      <div style={{zIndex: 4}}>
-        <Input
-          autoFocus
-          style={{ ...styles.input }}
-          value={input}
-          onChange={handleInput}
-          disableUnderline
-        />
-        <Button
-          onClick={submit}
-          style={{
-            ...styles.saveButton,
-          }}
-          startIcon={<SaveIcon />}
-        />
-         <Button
-          onClick={cancel}
-          style={{
-            ...styles.saveButton,
-          }}
-          startIcon={<CancelIcon />}
-        />
-      </div>
-    ) : (
-      <p style={styles.token} onClick={focusSelf}>{node.name}</p>
-    )}
-  </div>
+  return (
+    <div style={styles.nameField}>
+      {edit ? (
+        <div style={{ zIndex: 4 }}>
+          <Input
+            autoFocus
+            style={{ ...styles.input }}
+            value={input}
+            onChange={handleInput}
+            disableUnderline
+          />
+          <Button
+            onClick={submit}
+            style={{
+              ...styles.saveButton,
+            }}
+            startIcon={<SaveIcon />}
+          />
+          <Button
+            onClick={cancel}
+            style={{
+              ...styles.saveButton,
+            }}
+            startIcon={<CancelIcon />}
+          />
+        </div>
+      ) : (
+        <p style={styles.token} onClick={focusSelf}>
+          {node.name}
+        </p>
+      )}
+    </div>
+  );
 };
 
 export default NameField;

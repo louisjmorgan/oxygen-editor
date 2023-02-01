@@ -34,5 +34,4 @@ const shortcuts = {
   indent: "Tab",
 };
 
-
 export default shortcuts;

@@ -60,7 +60,7 @@ function SaveAsModal({ open, handleClose, state, dispatch }: SaveAsProps) {
             isOpen: true,
             content: {
               title: "Error",
-              text: `${err}`,
+              text: `Save tree failed. Service may be unavailable. Please try again later.`,
               buttonTrue: "Close",
               buttonFalse: null,
             },

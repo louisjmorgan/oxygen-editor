@@ -1,0 +1,11 @@
+{
+  "success": true,
+  "tree": {
+    "id": 2,
+    "title": "new tree",
+    "content": "sibling1\n\tchild1\n\tchild2\nsibling2\n\tchild1\n\tchild2",
+    "user": 1,
+    "updatedAt": "2023-01-28T18:08:23.643Z",
+    "createdAt": "2023-01-28T18:08:23.643Z"
+  }
+}

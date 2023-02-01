@@ -22,8 +22,7 @@ type FileProps = {
 };
 
 export default function FileMenu({ dispatch, state }: FileProps) {
-
-  const shouldHideButtonText = useMediaQuery('(min-width:600px)');
+  const shouldHideButtonText = useMediaQuery("(min-width:600px)");
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -72,7 +71,7 @@ export default function FileMenu({ dispatch, state }: FileProps) {
               isOpen: true,
               content: {
                 title: "Error",
-                text: `${err}`,
+                text: `Save tree failed. Service may be unavailable. Please try again later.`,
                 buttonTrue: "Close",
                 buttonFalse: null,
               },
@@ -124,7 +123,10 @@ export default function FileMenu({ dispatch, state }: FileProps) {
                 console.log(res);
                 dispatch({
                   type: "load tree",
-                  tree: res.fetched[state.fetched.current - 1] || {title: '(unsaved tree)', content: defaultTree},
+                  tree: res.fetched[state.fetched.current - 1] || {
+                    title: "(unsaved tree)",
+                    content: defaultTree,
+                  },
                   index: state.fetched.current - 1,
                 });
                 dispatch({
@@ -178,7 +180,7 @@ export default function FileMenu({ dispatch, state }: FileProps) {
         sx={{ borderRadius: 0 }}
         startIcon={<InsertDriveFileIcon />}
       >
-        {shouldHideButtonText ? 'File' : '' }
+        {shouldHideButtonText ? "File" : ""}
       </Button>
       <Menu
         id="basic-menu"

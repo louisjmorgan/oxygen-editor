@@ -76,8 +76,8 @@ const InsertNodeField = ({
           <Input
             autoFocus
             style={{
-              marginLeft: addressMap.insertTarget === "child" ? "5em" : "2rem",
               ...styles.insertNode,
+              marginLeft: addressMap.insertTarget === "child" ? "5em" : "2rem",
             }}
             value={addressMap.inputNode}
             onChange={handleInput}
@@ -87,6 +87,7 @@ const InsertNodeField = ({
             onClick={handleSubmit}
             style={{
               ...styles.saveButton,
+              marginLeft: addressMap.insertTarget === "child" ? "5em" : "2rem",
             }}
             startIcon={<SaveIcon />}
           />

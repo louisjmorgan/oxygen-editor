@@ -1,0 +1,21 @@
+{
+  "success": true,
+  "trees": [
+    {
+      "id": 1,
+      "user": 1,
+      "title": "tree 2",
+      "content": "brother1\n\tbaby1\n\tbaby2\nbrother2\n\tbaby1\n\tbaby2",
+      "createdAt": "2022-11-24T11:36:10.612Z",
+      "updatedAt": "2022-11-24T11:36:10.612Z"
+    },
+    {
+      "id": 2,
+      "user": 1,
+      "title": "tree 1",
+      "content": "sibling1\n\tchild1\n\tchild2\nsibling2\n\tchild1\n\tchild2",
+      "createdAt": "2022-11-24T11:14:23.959Z",
+      "updatedAt": "2023-01-03T13:15:21.063Z"
+    }
+  ]
+}

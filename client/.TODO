@@ -2,3 +2,7 @@
 -empty my trees
 -text area dialog (paste multiple)
 -shortcuts dialog prettify
+-Bugs
+  delete index 0 tree
+  save without input
+  

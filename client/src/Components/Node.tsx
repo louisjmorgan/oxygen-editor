@@ -7,7 +7,7 @@ import {
   AddressMapItem,
   Node as NodeType,
 } from "../Model/Types";
-const {useRef } = React;
+const { useRef } = React;
 
 const styles: { [key: string]: React.CSSProperties } = {
   node: {
@@ -15,16 +15,15 @@ const styles: { [key: string]: React.CSSProperties } = {
     marginLeft: "3em",
     textAlign: "left",
     transition: "0.3s ease-in",
-    whiteSpace: 'nowrap',
-    cursor: 'pointer',
-    WebkitTapHighlightColor: 'transparent',
+    whiteSpace: "nowrap",
+    cursor: "pointer",
+    WebkitTapHighlightColor: "transparent",
   },
 
   flex: {
     display: "flex",
     height: "2em",
     alignItems: "center",
-
   },
 
   collapseChildren: {
@@ -68,7 +67,7 @@ const Node = ({
   const ref = useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    if (focussed !== -1 && ref.current) {
+    if (focussed !== -1 && ref.current && ref.current.scrollIntoView) {
       ref.current.scrollIntoView({
         behavior: "smooth",
         block: "center",
@@ -100,7 +99,7 @@ const Node = ({
       return;
     }
     dispatch({
-      type: "paste node",
+      type: "submit node",
       nodeString: input,
       node: node,
       target: "sibling",
@@ -116,10 +115,10 @@ const Node = ({
       return;
     }
     dispatch({
-      type: "paste node",
+      type: "submit node",
       nodeString: input,
       node: node,
-      target: "child"
+      target: "child",
     });
   };
   const childNodes = [...node.children].map(
@@ -143,14 +142,17 @@ const Node = ({
   return (
     <>
       {visible && (
-        <div style={{...styles.node, width: `${node.name.length + 10}ch`}}>
+        <div
+          style={{ ...styles.node, width: `${node.name.length + 10}ch` }}
+          data-testid={node.address.toString()}
+        >
           <div
             ref={ref}
             style={{
               ...styles.flex,
               // outline: focussed > -1 ? "solid white 1px" : "none",
-              backgroundColor: focussed > -1 ? "white" : '',
-              color: isRoot ? "lightgreen" : focussed > - 1 ? 'black' : 'white',
+              backgroundColor: focussed > -1 ? "white" : "",
+              color: isRoot ? "lightgreen" : focussed > -1 ? "black" : "white",
             }}
           >
             <button
@@ -158,7 +160,11 @@ const Node = ({
               style={{
                 opacity: node.children.size > 0 ? 1 : 0,
                 ...styles.collapseChildren,
-                color: isRoot ? "lightgreen" : focussed > - 1 ? 'black' : 'white',
+                color: isRoot
+                  ? "lightgreen"
+                  : focussed > -1
+                  ? "black"
+                  : "white",
               }}
               tabIndex={-1}
             >

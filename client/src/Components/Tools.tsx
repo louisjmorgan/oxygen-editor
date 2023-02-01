@@ -4,12 +4,12 @@ const e = React.createElement;
 
 const styles = {
   tools: {
-    position: 'absolute',
+    position: "absolute",
     display: "flex",
     alignContent: "center",
     top: 0,
     bottom: 0,
-    left: '100%',
+    left: "100%",
   },
 
   toolButton: {
@@ -31,15 +31,15 @@ const styles = {
 };
 
 type ToolsProps = {
-  showTools: boolean,
-  isRoot: boolean,
-  editName: () => void,
-  copyNode: () => void,
-  pasteNode: () => void,
-  copyAddress: () => void,
-  deleteSelf: () => void,
-  editNode: () => void,
-}
+  showTools: boolean;
+  isRoot: boolean;
+  editName: () => void;
+  copyNode: () => void;
+  pasteNode: () => void;
+  copyAddress: () => void;
+  deleteSelf: () => void;
+  editNode: () => void;
+};
 
 function Tools({
   showTools,
@@ -51,76 +51,77 @@ function Tools({
   deleteSelf,
   editNode,
 }: ToolsProps) {
-
-  return <>
-  {showTools
-    ? e(
-        "div",
-        { style: styles.tools },
-        e(
-          "button",
-          {
-            onClick: () => editName(),
-            style: {
-              ...styles.toolButton,
-            },
-          },
-          "🖉"
-        ),
-        e(
-          "button",
-          {
-            onClick: copyNode,
-            style: {
-              ...styles.toolButton,
-            },
-          },
-          "⎘"
-        ),
-        e(
-          "button",
-          {
-            onClick: pasteNode,
-            style: {
-              ...styles.toolButton,
-            },
-          },
-          "📋"
-        ),
-        e(
-          "button",
-          {
-            onClick: copyAddress,
-            style: {
-              ...styles.toolButton,
-            },
-          },
-          "@"
-        ),
-        e(
-          "button",
-          {
-            onClick: deleteSelf,
-            style: {
-              ...styles.toolButton,
-            },
-            id: "delete",
-          },
-          "⌫"
-        ),
-        e(
-          "button",
-          {
-            onClick: editNode,
-            style: {
-              ...styles.toolButton,
-            },
-          },
-          "➕"
-        )
-      )
-    : ""}
+  return (
+    <>
+      {showTools
+        ? e(
+            "div",
+            { style: styles.tools },
+            e(
+              "button",
+              {
+                onClick: () => editName(),
+                style: {
+                  ...styles.toolButton,
+                },
+              },
+              "🖉"
+            ),
+            e(
+              "button",
+              {
+                onClick: copyNode,
+                style: {
+                  ...styles.toolButton,
+                },
+              },
+              "⎘"
+            ),
+            e(
+              "button",
+              {
+                onClick: pasteNode,
+                style: {
+                  ...styles.toolButton,
+                },
+              },
+              "📋"
+            ),
+            e(
+              "button",
+              {
+                onClick: copyAddress,
+                style: {
+                  ...styles.toolButton,
+                },
+              },
+              "@"
+            ),
+            e(
+              "button",
+              {
+                onClick: deleteSelf,
+                style: {
+                  ...styles.toolButton,
+                },
+                id: "delete",
+              },
+              "⌫"
+            ),
+            e(
+              "button",
+              {
+                onClick: editNode,
+                style: {
+                  ...styles.toolButton,
+                },
+              },
+              "➕"
+            )
+          )
+        : ""}
     </>
+  );
 }
 
 export default Tools;

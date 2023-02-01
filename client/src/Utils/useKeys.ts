@@ -18,18 +18,18 @@ const useKeys = (state: State) => {
     onFocus();
     // Specify how to clean up after this effect:
     return () => {
-        window.removeEventListener("focus", onFocus);
-        window.removeEventListener("blur", onBlur);
+      window.removeEventListener("focus", onFocus);
+      window.removeEventListener("blur", onBlur);
     };
   }, []);
 
   const onFocus = () => {
-    setPressedKeys([])
-  }
+    setPressedKeys([]);
+  };
 
   const onBlur = () => {
-    setPressedKeys([])
-  }
+    setPressedKeys([]);
+  };
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -50,7 +50,7 @@ const useKeys = (state: State) => {
       }
       // && !pressedKeys.includes(key)
       if (ALLOWED_KEYS.includes(key)) {
-        if (!state.editing) e.preventDefault()
+        if (!state.editing) e.preventDefault();
         setPressedKeys((previousPressedKeys) => [...previousPressedKeys, key]);
       }
     };

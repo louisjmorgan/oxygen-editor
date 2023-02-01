@@ -61,7 +61,6 @@ export default function RegisterModal({
   handleClose,
   dispatch,
 }: RegisterProps) {
-
   const content = {
     header: "Register",
     description: "You can save your trees and access them later.",
@@ -76,46 +75,78 @@ export default function RegisterModal({
   });
   const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const res = await register(
-      e.target[0].value,
-      e.target[1].value,
-      e.target[2].value
-    );
-    console.log(res);
-    if (res.success) {
-      setError({
-        username: false,
-        password: false,
-        confirmPassword: false,
-      });
-      login(e.target[0].value, e.target[1].value).then((res) => {
+    register(e.target[0].value, e.target[1].value, e.target[2].value)
+      .then((res) => {
         if (res.success) {
-          dispatch({
-            type: "set fetched trees",
-            trees: res.trees,
+          setError({
+            username: false,
+            password: false,
+            confirmPassword: false,
           });
-          dispatch({
-            type: "set user",
-            user: res.token,
+          login(e.target[0].value, e.target[1].value)
+            .then((res) => {
+              if (res.success) {
+                dispatch({
+                  type: "set fetched trees",
+                  trees: res.trees,
+                });
+                dispatch({
+                  type: "set user",
+                  user: res.token,
+                });
+                handleClose();
+              }
+            })
+            .catch((err) => {
+              dispatch({
+                type: "set error dialog",
+                dialog: {
+                  isOpen: true,
+                  content: {
+                    title: "Error",
+                    text: `Login failed. Service may be unavailable. Please try again later.`,
+                    buttonTrue: "Close",
+                    buttonFalse: null,
+                  },
+                  action: () => {
+                    return;
+                  },
+                },
+              });
+            });
+        } else if (res.errors) {
+          setError({
+            username: false,
+            password: false,
+            confirmPassword: false,
           });
-          handleClose();
+          res.errors.forEach((err) => {
+            if (err.param === "password")
+              setError((prev) => ({ ...prev, password: err.msg }));
+            if (err.param === "confirmPassword")
+              setError((prev) => ({ ...prev, confirmPassword: err.msg }));
+            if (err.param === "username")
+              setError((prev) => ({ ...prev, username: err.msg }));
+          });
         }
+      })
+      .catch((err) => {
+        dispatch({
+          type: "set error dialog",
+          dialog: {
+            isOpen: true,
+            content: {
+              title: "Error",
+              text: `Registration failed. Service may be unavailable. Please try again later.`,
+              buttonTrue: "Close",
+              buttonFalse: null,
+            },
+            action: () => {
+              return;
+            },
+          },
+        });
       });
-    } else if (res.errors) {
-      setError({
-        username: false,
-        password: false,
-        confirmPassword: false,
-      });
-      res.errors.forEach((err) => {
-        if (err.param === "password")
-          setError((prev) => ({ ...prev, password: err.msg }));
-        if (err.param === "confirmPassword")
-          setError((prev) => ({ ...prev, confirmPassword: err.msg }));
-        if (err.param === "username")
-          setError((prev) => ({ ...prev, username: err.msg }));
-      });
-    }
   };
 
   return (

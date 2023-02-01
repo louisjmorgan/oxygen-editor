@@ -4,12 +4,12 @@
 import "./App.css";
 import * as React from "react";
 import Node from "./Components/Node";
-import { treeReducer } from "./Model/Tree";
+import { treeReducer } from "./Model/Store";
 import { State, ACTIONTYPE } from "./Model/Types";
 import keyHandler from "./Utils/keyHandler";
 import useKeys from "./Utils/useKeys";
 import { Box } from "@mui/material";
-import { getUser } from "./Utils/auth";
+import { getUser, logout } from "./Utils/auth";
 import ActionBar from "./Components/ActionBar/ActionBar";
 import { fetchTrees } from "./Model/Server";
 import { ThemeProvider, createTheme } from "@mui/material";
@@ -25,7 +25,7 @@ const theme = createTheme({
   },
 });
 
-const code = "sibling1\n\tchild1\n\tchild2\nsibling2\n\tchild1\n\tchild2"
+const code = "sibling1\n\tchild1\n\tchild2\nsibling2\n\tchild1\n\tchild2";
 
 function App() {
   // initialize state handlers
@@ -77,23 +77,62 @@ function App() {
       type: "initialize",
       code: code,
     });
-    setLoaded(() => true);
+    setLoaded(true);
+    return () => {
+      setLoaded(false);
+    };
   }, []);
 
   // initialize user authentication
   useEffect(() => {
     const currentUser = getUser();
-    if (!currentUser) return;
+    if (!currentUser) {
+      return;
+    }
     dispatch({
       type: "set user",
       user: currentUser,
     });
-    fetchTrees().then((res) =>
-      dispatch({
-        type: "set fetched trees",
-        trees: res.trees,
+    fetchTrees()
+      .then((res) => {
+        if (res.success) {
+          dispatch({
+            type: "set fetched trees",
+            trees: res.trees,
+          });
+          if (res.trees[0]) {
+            dispatch({
+              type: "load tree",
+              tree: res.trees[0],
+              index: 0,
+            });
+          }
+        } else {
+          logout();
+          dispatch({
+            type: "set user",
+            user: "",
+          });
+        }
       })
-    );
+      .catch((err) => {
+        console.log(err);
+        dispatch({
+          type: "set error dialog",
+          dialog: {
+            isOpen: true,
+            content: {
+              title: "Error",
+              text: `Fetch failed. Service may be unavailable. Please try again later.`,
+              buttonTrue: "Close",
+              buttonFalse: null,
+            },
+            action: () => {
+              return;
+            },
+          },
+        });
+      });
   }, []);
 
   // intitialize ui handlers
@@ -102,7 +141,6 @@ function App() {
   function collapseAll() {
     dispatch({
       type: "set collapse all",
-      displayChildren: !collapsed,
     });
     setCollapse(!collapsed);
   }
@@ -114,12 +152,12 @@ function App() {
     });
     return index;
   }
+
   // initialize key handlers
   const pressedKeys = useKeys(state);
   useEffect(() => {
     keyHandler(dispatch, pressedKeys, state, collapseAll);
   }, [pressedKeys]);
-
 
   return (
     <ThemeProvider theme={theme}>
@@ -131,23 +169,28 @@ function App() {
             collapseAll={collapseAll}
           />
           <main className="App-main">
-            <Box sx={{overflow: 'auto', width: '100%', padding: '2rem 1rem'}}>
-            <Node
-              node={state.tree}
-              key="root"
-              isRoot={true}
-              focussed={findFocusIndex(state.tree.address)}
-              findFocusIndex={findFocusIndex}
-              addressMap={state.addressMap}
-              displayChildren={
-                state.addressMap.get(state.tree.address.toString())
-                  ?.display as boolean
-              }
-              visible={true}
-              dispatch={dispatch}
-            />
+            <Box sx={{ overflow: "auto", width: "100%", padding: "2rem 1rem" }}>
+              <Node
+                node={state.tree}
+                key="root"
+                isRoot={true}
+                focussed={findFocusIndex(state.tree.address)}
+                findFocusIndex={findFocusIndex}
+                addressMap={state.addressMap}
+                displayChildren={
+                  state.addressMap.get(state.tree.address.toString())
+                    ?.display as boolean
+                }
+                visible={true}
+                dispatch={dispatch}
+              />
             </Box>
-            <ToolMenu dispatch={dispatch} />
+            <ToolMenu
+              dispatch={dispatch}
+              tree={state.tree}
+              clipboard={state.clipboard}
+              focus={state.focus}
+            />
           </main>
         </>
       )}

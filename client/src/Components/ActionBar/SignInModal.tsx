@@ -17,11 +17,10 @@ import {
 import { login } from "../../Utils/auth";
 import { ACTIONTYPE, LoginError } from "src/Model/Types";
 
-
 type SignInProps = {
   open: boolean;
   handleClose: () => void;
-  dispatch: (action: ACTIONTYPE) => void
+  dispatch: (action: ACTIONTYPE) => void;
 };
 
 type errorState = {
@@ -29,7 +28,11 @@ type errorState = {
   password: string | boolean;
 };
 
-export default function SignInModal({ open, handleClose, dispatch }: SignInProps) {
+export default function SignInModal({
+  open,
+  handleClose,
+  dispatch,
+}: SignInProps) {
   const content = {
     header: "Sign In",
     description: "You can save your trees and access them later.",
@@ -42,7 +45,7 @@ export default function SignInModal({ open, handleClose, dispatch }: SignInProps
     password: false,
   });
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+    e.preventDefault();
     login(e.target[0].value, e.target[1].value)
       .then((res) => {
         if (res.success) {
@@ -51,14 +54,21 @@ export default function SignInModal({ open, handleClose, dispatch }: SignInProps
             password: false,
           });
           dispatch({
-            type: 'set fetched trees',
+            type: "set fetched trees",
             trees: res.trees,
-          })
+          });
+          if (res.trees[0]) {
+            dispatch({
+              type: "load tree",
+              tree: res.trees[0],
+              index: 0,
+            });
+          }
           dispatch({
-            type: 'set user',
+            type: "set user",
             user: res.token,
-          })
-          handleClose()
+          });
+          handleClose();
         } else {
           setError({
             username: false,
@@ -73,21 +83,23 @@ export default function SignInModal({ open, handleClose, dispatch }: SignInProps
         }
       })
       .catch((err) => {
-        console.log(err)
+        console.log(err);
         dispatch({
-          type: 'set error dialog',
+          type: "set error dialog",
           dialog: {
             isOpen: true,
             content: {
-              title: 'Error',
-              text: `${err}`,
-              buttonTrue: 'Close',
+              title: "Error",
+              text: `Login failed. Service may be unavailable. Please try again later.`,
+              buttonTrue: "Close",
               buttonFalse: null,
             },
-            action: () => { return }
-          }
-        })
-      })
+            action: () => {
+              return;
+            },
+          },
+        });
+      });
   };
 
   return (

@@ -1,11 +1,17 @@
 import * as React from "react";
-import { Button, ButtonGroup, Menu, MenuItem, useMediaQuery } from "@mui/material/";
+import {
+  Button,
+  ButtonGroup,
+  Menu,
+  MenuItem,
+  useMediaQuery,
+} from "@mui/material/";
 import { ACTIONTYPE } from "src/Model/Types";
 import ShortcutsModal from "./ShortcutsModal";
-import KeyboardCommandKeyIcon from '@mui/icons-material/KeyboardCommandKey';
-import UnfoldLessIcon from '@mui/icons-material/UnfoldLess';
-import UndoIcon from '@mui/icons-material/Undo';
-import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
+import KeyboardCommandKeyIcon from "@mui/icons-material/KeyboardCommandKey";
+import UnfoldLessIcon from "@mui/icons-material/UnfoldLess";
+import UndoIcon from "@mui/icons-material/Undo";
+import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 
 type CommandsProps = {
   dispatch: (action: ACTIONTYPE) => void;
@@ -13,8 +19,7 @@ type CommandsProps = {
 };
 
 export default function CommandsMenu({ dispatch, collapsed }: CommandsProps) {
-
-  const shouldHideButtonText = useMediaQuery('(min-width:600px)');
+  const shouldHideButtonText = useMediaQuery("(min-width:600px)");
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -30,7 +35,6 @@ export default function CommandsMenu({ dispatch, collapsed }: CommandsProps) {
   function collapseAll() {
     dispatch({
       type: "set collapse all",
-      displayChildren: !collapsed,
     });
   }
 
@@ -67,7 +71,7 @@ export default function CommandsMenu({ dispatch, collapsed }: CommandsProps) {
         sx={{ borderRadius: 0 }}
         startIcon={<KeyboardCommandKeyIcon />}
       >
-        {shouldHideButtonText ? 'Commands' : ''}
+        {shouldHideButtonText ? "Commands" : ""}
       </Button>
       <Menu
         id="basic-menu"
@@ -81,13 +85,25 @@ export default function CommandsMenu({ dispatch, collapsed }: CommandsProps) {
       >
         <ButtonGroup color="primary" variant="text" orientation="vertical">
           <MenuItem>
-            <Button onClick={collapseAll} startIcon={collapsed ? <UnfoldMoreIcon /> : <UnfoldLessIcon />}>{collapsed ? 'Uncollapse all' : 'Collapse all'}</Button>
+            <Button
+              onClick={collapseAll}
+              startIcon={collapsed ? <UnfoldMoreIcon /> : <UnfoldLessIcon />}
+            >
+              {collapsed ? "Uncollapse all" : "Collapse all"}
+            </Button>
           </MenuItem>
           <MenuItem>
-            <Button onClick={undo} startIcon={<UndoIcon />}>undo</Button>
+            <Button onClick={undo} startIcon={<UndoIcon />}>
+              undo
+            </Button>
           </MenuItem>
           <MenuItem>
-            <Button onClick={handleOpenShortcuts} startIcon={<KeyboardCommandKeyIcon />}>Shortcuts</Button>
+            <Button
+              onClick={handleOpenShortcuts}
+              startIcon={<KeyboardCommandKeyIcon />}
+            >
+              Shortcuts
+            </Button>
           </MenuItem>
         </ButtonGroup>
       </Menu>

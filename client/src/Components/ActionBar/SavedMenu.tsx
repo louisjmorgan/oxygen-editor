@@ -86,10 +86,12 @@ export default function SavedMenu({ dispatch, fetched }: SavedProps) {
         sx={{ borderRadius: 0 }}
         startIcon={<AccountTreeIcon />}
       >
-        <Typography sx={{display: {xs: 'none', sm: 'block'}}}>
-        {fetched.current !== -1
-          ? fetched.trees[fetched.current].title
-          : <i>(unsaved tree)</i>}
+        <Typography sx={{ display: { xs: "none", sm: "block" } }}>
+          {fetched.current !== -1 ? (
+            fetched.trees[fetched.current].title
+          ) : (
+            <i>(unsaved tree)</i>
+          )}
         </Typography>
       </Button>
       <Menu
@@ -102,18 +104,16 @@ export default function SavedMenu({ dispatch, fetched }: SavedProps) {
         }}
         disableScrollLock
       >
-        {fetched.current === -1 ? 
+        {fetched.current === -1 ? (
           <MenuItem key="local">
             <b>{"(unsaved tree)"}</b>
           </MenuItem>
-          : ''
-        }
+        ) : (
+          ""
+        )}
         {fetched.trees.map((tree, index) => (
           <MenuItem key={tree.id} onClick={() => handleLoadTree(tree, index)}>
-             {fetched.current === index
-          ? <b>{tree.title}</b>
-          : tree.title}
-            
+            {fetched.current === index ? <b>{tree.title}</b> : tree.title}
           </MenuItem>
         ))}
       </Menu>
